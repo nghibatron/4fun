@@ -23,12 +23,11 @@
 
         .container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
             background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
         }
 
         body.dark-mode .container {
@@ -39,14 +38,16 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            flex: 1;
         }
 
-        .input-section, .history-section {
+        .input-section {
             margin: 10px;
         }
 
         .main-number {
             margin: 20px 0;
+            text-align: center;
         }
 
         .main-number h1 {
@@ -56,10 +57,11 @@
 
         .history-section {
             width: 200px;
+            margin-left: 20px;
         }
 
         .history-list {
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: scroll;
             border: 1px solid #ddd;
             padding: 10px;
@@ -76,6 +78,20 @@
         button {
             padding: 10px 15px;
             margin-left: 10px;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background-color: #007bff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
         }
 
         #historyList p {
@@ -104,16 +120,16 @@
                 <input type="number" id="min" name="min" required>
                 <label for="max">Max:</label>
                 <input type="number" id="max" name="max" required>
-                <button id="generateButton">Generate</button>
+                <button id="generateButton">GO</button>
                 <p>Remaining Attempts: <span id="remainingAttempts">30</span></p>
             </div>
             <div class="main-number">
                 <h1 id="currentNumber"></h1>
             </div>
-            <div class="history-section">
-                <h2>History</h2>
-                <div class="history-list" id="historyList"></div>
-            </div>
+        </div>
+        <div class="history-section">
+            <h2>History</h2>
+            <div class="history-list" id="historyList"></div>
         </div>
     </div>
     <script>
