@@ -1,0 +1,4 @@
+git add .
+git commit -m ""
+git push origin main (main là nhánh)
+git push -u origin main

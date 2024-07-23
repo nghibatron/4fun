@@ -1,0 +1,100 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+#fireworksCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#controlsContainer {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+#controls {
+    display: none;
+}
+
+#controls.expanded {
+    display: block;
+}
+
+#toggleControls {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+}
+
+input[type="text"], input[type="number"], select {
+    width: 100%;
+    padding: 5px;
+    margin-top: 5px;
+}
+
+.dark-mode {
+    background-color: #222;
+    color: #fff;
+}
+
+.dark-mode #controlsContainer {
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+}
+
+.toggle-container {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.toggle-input {
+    display: none;
+}
+
+.toggle-label {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    background-color: #ccc;
+    border-radius: 34px;
+    transition: background-color 0.3s;
+    cursor: pointer;
+}
+
+.toggle-label::after {
+    content: '';
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: white;
+    top: 4px;
+    left: 4px;
+    transition: 0.3s;
+}
+
+.toggle-input:checked + .toggle-label {
+    background-color: #2196F3;
+}
+
+.toggle-input:checked + .toggle-label::after {
+    transform: translateX(26px);
+}
