@@ -74,16 +74,16 @@
             <input type="text" id="textInput" placeholder="Nhập ký tự">
             <button onclick="addInputCharacters()">Thêm Ký Tự</button>
         </div>
-        <div>
-            <button onclick="addImageUrlInput()">Thêm URL Ảnh</button>
-            <div id="imageInputsContainer"></div>
-        </div>
-        <div>
+		<div>
             <label for="textAddInterval">Interval thêm ký tự (ms):</label>
             <input type="number" id="textAddInterval" value="1000">
             <button id="AddAutoText" class="toggle-button" onclick="toggleAutoAddText()">Dừng/Thêm Ký Tự Tự Động</button>
         </div>
         <div>
+            <button onclick="addImageUrlInput()">Thêm URL Ảnh</button>
+            <div id="imageInputsContainer"></div>
+        </div>
+		<div>
             <label for="imageAddInterval">Interval thêm ảnh (ms):</label>
             <input type="number" id="imageAddInterval" value="1000">
             <button id="AddAutoImage" class="toggle-button" onclick="toggleAutoAddImage()">Dừng/Thêm Ảnh Tự Động</button>
@@ -338,8 +338,6 @@
                     addCharacter(randomChar, Math.random() * canvas.width, Math.random() * canvas.height, getRandomColor(), true);
 					const randomChar1 = String.fromCharCode(Math.floor(Math.random() * (0x2600 - 0x2700))+ 0x2700);
                     addCharacter(randomChar1, Math.random() * canvas.width, Math.random() * canvas.height, getRandomColor(), true);
-					const randomChar2 = String.fromCharCode(Math.floor(Math.random() * (0x1F1E6 - 0x1F1FF))+ 0x1F1FF);
-                    addCharacter(randomChar2, Math.random() * canvas.width, Math.random() * canvas.height, getRandomColor(), true);
 					const char = String.fromCodePoint(Math.floor(Math.random() * (0x1F600 - 0x1F300)) + 0x1F300);
                     const color = getRandomColor();
                     addCharacter(char, Math.random() * canvas.width, Math.random() * canvas.height, color, true);
