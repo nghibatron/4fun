@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Falling Emojis</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            transition: background-color 0.5s;
+            background-color: #333; /* Default to dark mode */
+            font-family: Arial, sans-serif;
+        }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        #emojiInput, #durationInput {
+            width: 50px;
+            font-size: 16px;
+        }
+        button {
+            cursor: pointer;
+        }
+        .active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        canvas {
+            display: block;
+        }
+        label {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <input type="text" id="emojiInput" placeholder="😊" maxlength="2">
+        <button id="randomToggle">Random: OFF</button>
+        <label for="durationInput">Duration (s):</label>
+        <input type="number" id="durationInput" value="5" min="1" step="1">
+        <button id="toggleMode">Toggle Dark/Light Mode</button>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const toggleButton = document.getElementById('toggleMode');
+        const emojiInput = document.getElementById('emojiInput');
+        const randomToggle = document.getElementById('randomToggle');
+        const durationInput = document.getElementById('durationInput');
+
+        let isDarkMode = true; // Start in dark mode
+        let isRandomMode = false;
+        let emojis = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.style.backgroundColor = isDarkMode ? '#333' : '#fff';
+            document.querySelector('label').style.color = isDarkMode ? 'white' : 'black';
+        }
+
+		function getRandomColor() {
+			return `hsl(${Math.random() * 360}, 100%, 50%)`;
+        }
+
+		class DopplerEffect {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.radius = 40;
+                this.maxRadius = 10;
+                this.color = color;
+                this.opacity = 0.5;
+            }
+
+            update() {
+                this.radius -= 1;
+                this.opacity -= 0.02;
+                return this.radius >= this.maxRadius;
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(${this.color.join(',')},${this.opacity})`;
+                ctx.stroke();
+            }
+        }
+
+        class Emoji {
+            constructor(x, y, emoji, duration) {
+                this.x = x;
+                this.y = 0;
+                this.targetY = y;
+                this.emoji = emoji;
+				this.dx = 0;
+                this.dy = 0;
+                this.gravity = 0.5;
+                this.bounce = 0.8;
+                this.fontSize = 40;
+                this.creationTime = Date.now();
+                this.duration = duration * 1000; // Convert to milliseconds
+				this.color = getRandomColor();
+				this.hasLanded = false;
+			}
+
+            update() {
+                this.dy += this.gravity;
+                this.y += this.dy;
+				this.x += this.dx;
+				
+				if (this.x < this.fontSize / 2 || this.x > canvas.width - this.fontSize / 2) {
+                    this.dx *= -1;
+                }
+				
+                if (this.y + this.fontSize > this.targetY) {
+                    this.y = this.targetY - this.fontSize;
+                    this.dy *= -this.bounce;
+					this.dx *= 0.99;
+					if (Math.abs(this.dy) > 0.5) { // Chỉ tạo hiệu ứng khi nảy đủ mạnh
+						return new DopplerEffect(this.x, this.targetY, this.getRGBColor());
+					}
+                }
+				// Collision with other emojis
+                emojis.forEach(other => {
+                    if (other !== this) {
+                        const dx = other.x - this.x;
+                        const dy = other.y - this.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distance < this.fontSize) {
+                            // Collision detected
+                            const angle = Math.atan2(dy, dx);
+                            const targetX = this.x + Math.cos(angle) * this.fontSize;
+                            const targetY = this.y + Math.sin(angle) * this.fontSize;
+                            const ax = (targetX - other.x) * 0.05;
+                            const ay = (targetY - other.y) * 0.05;
+
+                            this.dx -= ax;
+                            this.dy -= ay;
+                            other.dx += ax;
+                            other.dy += ay;
+                        }
+                    }
+                });
+				return null;
+            }
+
+            draw() {
+				ctx.font = `${this.fontSize}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+				ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                //ctx.fillText(this.emoji, this.x, this.y + this.fontSize / 2 + this.shadowOffsetY);
+				ctx.fillStyle = this.color;
+                ctx.fillText(this.emoji, this.x, this.y);
+			}
+
+            shouldRemove() {
+                return Date.now() - this.creationTime > this.duration;
+            }
+			
+			getRGBColor() {
+                const r = parseInt(this.color.slice(1, 3), 16);
+                const g = parseInt(this.color.slice(3, 5), 16);
+                const b = parseInt(this.color.slice(5, 7), 16);
+                return [r, g, b];
+            }
+        }
+		
+		let dopplerEffects = [];
+		
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+			
+			dopplerEffects = dopplerEffects.filter(effect => {
+                effect.update();
+                effect.draw(ctx);
+                return effect.opacity > 0;
+            });
+			
+            emojis = emojis.filter(emoji => !emoji.shouldRemove());
+            emojis.forEach(emoji => {
+                const newEffect = emoji.update(emojis);
+                if (newEffect) {
+                    dopplerEffects.push(newEffect);
+                }
+                emoji.draw(ctx);
+            });
+            requestAnimationFrame(animate);
+        }
+		
+		function getRandomColor() {
+            return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+        }
+
+        function getRandomEmoji() {
+            const ranges = [
+                [0x1F600, 0x1F64F],
+                [0x1F300, 0x1F5FF],
+                [0x1F680, 0x1F6FF],
+                [0x1F1E6, 0x1F1FF],
+                [0x2600, 0x26FF],
+                [0x2700, 0x27BF],
+                [0xE0020, 0xE007F],
+                [0xFE00, 0xFE0F],
+                [0x1F900, 0x1F9FF],
+                [0x1F018, 0x1F270],
+                [0x238C, 0x2454],
+                [0x20D0, 0x20FF]
+            ];
+			
+            const totalEmojis = ranges.reduce((sum, [start, end]) => sum + (end - start + 1), 0);
+            let randomIndex = Math.floor(Math.random() * totalEmojis);
+
+            for (const [start, end] of ranges) {
+                const rangeSize = end - start + 1;
+                if (randomIndex < rangeSize) {
+                    return String.fromCodePoint(start + randomIndex);
+                }
+                randomIndex -= rangeSize;
+            }
+
+            // Fallback in case of any issues
+            return '😊';
+        }
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            let emoji;
+            if (isRandomMode) {
+                emoji = getRandomEmoji();
+            } else {
+                emoji = emojiInput.value || '😊';
+            }
+            const duration = parseInt(durationInput.value) || 5;
+            emojis.push(new Emoji(x, y, emoji, duration));
+        });
+
+        toggleButton.addEventListener('click', toggleDarkMode);
+        randomToggle.addEventListener('click', () => {
+            isRandomMode = !isRandomMode;
+            randomToggle.textContent = `Random: ${isRandomMode ? 'ON' : 'OFF'}`;
+            randomToggle.classList.toggle('active', isRandomMode);
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+
+        resizeCanvas();
+        animate();
+    </script>
+</body>
+</html>
