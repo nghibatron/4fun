@@ -327,6 +327,36 @@
             document.getElementById('randomSizeButton').classList.toggle('active', randomSize);
         }
 
+		function getRandomEmoji() {
+			const ranges = [
+				[0x1F600, 0x1F64F],
+				[0x1F300, 0x1F5FF],
+				[0x1F680, 0x1F6FF],
+				[0x1F1E6, 0x1F1FF],
+				[0x2600, 0x26FF],
+				[0x2700, 0x27BF],
+				[0xE0020, 0xE007F],
+				[0xFE00, 0xFE0F],
+				[0x1F900, 0x1F9FF],
+				[0x1F018, 0x1F270],
+				[0x238C, 0x2454],
+				[0x20D0, 0x20FF]
+			];
+
+			const totalEmojis = ranges.reduce((sum, [start, end]) => sum + (end - start + 1), 0);
+			let randomIndex = Math.floor(Math.random() * totalEmojis);
+
+			for (const [start, end] of ranges) {
+				const rangeSize = end - start + 1;
+				if (randomIndex < rangeSize) {
+					return String.fromCodePoint(start + randomIndex);
+				}
+				randomIndex -= rangeSize;
+			}
+		
+			return '😊'; // Fallback
+		}
+
         function toggleRandomMode() {
             randomMode = !randomMode;
             document.getElementById('randomModeButton').classList.toggle('active', randomMode);
@@ -336,11 +366,10 @@
                 randomIntervalId = setInterval(() => {
                     const randomChar = String.fromCharCode(Math.floor(Math.random() * (126 - 33 + 1)) + 33);
                     addCharacter(randomChar, Math.random() * canvas.width, Math.random() * canvas.height, getRandomColor(), true);
-					const randomChar1 = String.fromCharCode(Math.floor(Math.random() * (0x2600 - 0x2700))+ 0x2700);
-                    addCharacter(randomChar1, Math.random() * canvas.width, Math.random() * canvas.height, getRandomColor(), true);
-					const char = String.fromCodePoint(Math.floor(Math.random() * (0x1F600 - 0x1F300)) + 0x1F300);
-                    const color = getRandomColor();
-                    addCharacter(char, Math.random() * canvas.width, Math.random() * canvas.height, color, true);
+					
+					const randomEmoji = getRandomEmoji();
+					addCharacter(randomEmoji, Math.random() * canvas.width, Math.random() * canvas.height, getRandomColor(), true);
+					
                     const imageUrlInputs = document.querySelectorAll('#imageInputsContainer input');
                     imageUrlInputs.forEach(input => addImage(input.value, Math.random() * canvas.width, Math.random() * canvas.height, true));
                 }, randomInterval);
