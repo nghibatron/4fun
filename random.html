@@ -76,23 +76,41 @@
         }
 
         button {
-            padding: 10px 15px;
+            padding: 10px 20px;
             margin-left: 10px;
             border: none;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 18px;
+            
+            font-size: 16px;
             font-weight: bold;
             color: white;
-            background-color: #007bff;
+            background-color: #28a745;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s; transform 0.2s;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         button:hover {
-            background-color: #0056b3;
+            background-color: #218838;
+			transform: translateY(-2px);
         }
+		
+		.styled-button:active {
+			background-color: #1e7e34;
+			transform: translateY(0);
+		}
+		
+		.reset-button {
+			background-color: #dc3545;
+		}
+
+		.reset-button:hover {
+			background-color: #c82333;
+		}
+
+		.reset-button:active {
+			background-color: #bd2130;
+		}
 
         #historyList p {
             margin: 5px 0;
@@ -122,6 +140,10 @@
                 <input type="number" id="max" name="max" required>
                 <button id="generateButton">GO</button>
                 <p>Remaining Attempts: <span id="remainingAttempts">30</span></p>
+				<label for="limit">Set Custom Limit:</label>
+				<input type="number" id="limit" name="limit" min="1">
+				<button id="setLimitButton">Set Limit</button>
+				<button id="clearHistoryButton" class="styled-button reset-button">Clear History</button>
             </div>
             <div class="main-number">
                 <h1 id="currentNumber"></h1>
@@ -141,6 +163,9 @@
             const remainingAttempts = document.getElementById('remainingAttempts');
             const currentNumber = document.getElementById('currentNumber');
             const modeSelect = document.getElementById('mode');
+			const limitInput = document.getElementById('limit');
+			const setLimitButton = document.getElementById('setLimitButton');
+			const clearHistoryButton = document.getElementById('clearHistoryButton');
             const body = document.body;
 
             let attempts = 30;
@@ -167,7 +192,7 @@
             function reset() {
                 generatedNumbers.clear();
                 historyList.innerHTML = '';
-                attempts = 30;
+                attempts = parseInt(localStorage.getItem('limit')) || 30;
                 updateRemainingAttempts();
             }
 
@@ -176,6 +201,7 @@
                 const savedAttempts = localStorage.getItem('remainingAttempts');
                 const savedMode = localStorage.getItem('mode');
                 const savedCurrentNumber = localStorage.getItem('currentNumber');
+				const savedLimit = localStorage.getItem('limit');
 
                 if (savedHistory) {
                     historyList.innerHTML = savedHistory;
@@ -199,10 +225,14 @@
                 if (savedCurrentNumber) {
                     currentNumber.textContent = savedCurrentNumber;
                 }
+				
+				if (savedLimit) {
+					limitInput.value = savedLimit;
+				}
             }
 
             generateButton.addEventListener('click', () => {
-                const min = parseInt(minInput.value);
+                const min = parseInt(minInput.value) || 1;
                 const max = parseInt(maxInput.value);
 
                 if (isNaN(min) || isNaN(max) || min >= max) {
@@ -237,6 +267,25 @@
                     body.classList.remove('dark-mode');
                 }
             });
+			
+			setLimitButton.addEventListener('click', () => {
+				const limit = parseInt(limitInput.value);
+				if (isNaN(limit) || limit <= 0) {
+					alert('Please enter a valid number for the limit.');
+				} else {
+					localStorage.setItem('limit', limit);
+					attempts = limit;
+					updateRemainingAttempts();
+				}
+			});
+			
+			clearHistoryButton.addEventListener('click', () => {
+				if (confirm('Are you sure you want to clear the history?')) {
+					historyList.innerHTML = '';
+					generatedNumbers.clear();
+					localStorage.removeItem('history');
+				}
+			});
 
             loadState();
         });

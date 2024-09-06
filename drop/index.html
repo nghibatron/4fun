@@ -46,6 +46,7 @@
         <button id="randomToggle">Random: OFF</button>
         <label for="durationInput">Duration (s):</label>
         <input type="number" id="durationInput" value="5" min="1" step="1">
+		<button id="toggleSound">Sound: ON</button>
         <button id="toggleMode">Toggle Dark/Light Mode</button>
     </div>
     <canvas id="gameCanvas"></canvas>
@@ -57,7 +58,9 @@
         const emojiInput = document.getElementById('emojiInput');
         const randomToggle = document.getElementById('randomToggle');
         const durationInput = document.getElementById('durationInput');
-
+		const toggleSoundButton = document.getElementById('toggleSound');
+		
+		let isSoundEnabled = true;
         let isDarkMode = true; // Start in dark mode
         let isRandomMode = false;
         let emojis = [];
@@ -76,6 +79,32 @@
 		function getRandomColor() {
 			return `hsl(${Math.random() * 360}, 100%, 50%)`;
         }
+		
+		function playNote(frequency, duration) {
+			//if (!isSoundEnabled) return;
+			const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+			const oscillator = audioContext.createOscillator();
+			const gainNode = audioContext.createGain();
+
+			oscillator.type = 'sine';
+			oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+			oscillator.connect(gainNode);
+			gainNode.connect(audioContext.destination);
+
+			gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+			gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+
+			oscillator.start(audioContext.currentTime);
+			oscillator.stop(audioContext.currentTime + duration);
+		}
+		
+		function calculateFrequency(x, y) {
+			const minFreq = 220; // A3
+			const maxFreq = 880; // A5
+			const xFactor = x / canvas.width;
+			const yFactor = 1 - (y / canvas.height);
+			return minFreq + (maxFreq - minFreq) * (xFactor * 0.5 + yFactor * 0.5);
+		}
 
 		class DopplerEffect {
             constructor(x, y, color) {
@@ -132,6 +161,8 @@
                     this.dy *= -this.bounce;
 					this.dx *= 0.99;
 					if (Math.abs(this.dy) > 0.5) { // Chỉ tạo hiệu ứng khi nảy đủ mạnh
+						const frequency = calculateFrequency(this.x, this.y);
+						playNote(frequency, 0.1);
 						return new DopplerEffect(this.x, this.targetY, this.getRGBColor());
 					}
                 }
@@ -183,6 +214,7 @@
         }
 		
 		let dopplerEffects = [];
+		
 		
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -253,7 +285,13 @@
             const duration = parseInt(durationInput.value) || 5;
             emojis.push(new Emoji(x, y, emoji, duration));
         });
-
+		
+		toggleSoundButton.addEventListener('click', () => {
+			isSoundEnabled = !isSoundEnabled;
+			toggleSoundButton.textContent = `Sound: ${isSoundEnabled ? 'ON' : 'OFF'}`;
+			toggleSoundButton.classList.toggle('active', isSoundEnabled);
+		});
+		
         toggleButton.addEventListener('click', toggleDarkMode);
         randomToggle.addEventListener('click', () => {
             isRandomMode = !isRandomMode;
