@@ -247,12 +247,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const word = wordElement.textContent;
         if (!word || word === "Loading..." || word === "Lỗi!") return;
 
-        //const utterance = new SpeechSynthesisUtterance(word);
-        //utterance.lang = 'en-US';
-        //speechSynthesis.speak(utterance);
+        const utterance = new SpeechSynthesisUtterance(word);
+        utterance.lang = 'en-US';
+        speechSynthesis.speak(utterance);
 		
-		const audio = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=${encodeURIComponent(word)}`);
-        audio.play();
+		//const audio = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=${encodeURIComponent(word)}`);
+        //audio.play();
     }
 
     // Event listeners for word functions
