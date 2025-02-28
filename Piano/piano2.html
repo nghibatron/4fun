@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Piano</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+            background-color: #222;
+            color: white;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark-mode {
+            background-color: white;
+            color: black;
+        }
+        .note-display {
+            font-size: 2em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .piano {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .key {
+            border: 1px solid #000;
+            cursor: pointer;
+            user-select: none;
+        }
+        .white {
+            width: 50px;
+            height: 200px;
+            background-color: white;
+            color: black;
+        }
+        .black {
+            width: 30px;
+            height: 120px;
+            background-color: black;
+            margin-left: -15px;
+            margin-right: -15px;
+            z-index: 1;
+            color: white;
+        }
+        .key-reference {
+            position: fixed;
+            top: 10px;
+            right: 50px;
+            width: 200px;
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+            transition: transform 0.3s;
+            transform-origin: right;
+        }
+        .toggle-ref {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            background-color: #333;
+            color: white;
+            padding: 5px;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 1.2em;
+            user-select: none;
+            transition: transform 0.3s;
+        }
+        .controls {
+            margin-bottom: 20px;
+        }
+        .controls button {
+            font-size: 1em;
+            padding: 10px;
+            margin: 5px;
+        }
+		.key.active {
+            background-color: #ddd;
+            transform: translateY(2px);
+        }
+        .black.active {
+            background-color: #333;
+        }
+        .recording-list {
+            margin-top: 20px;
+            max-width: 400px;
+            width: 100%;
+        }
+        .recording-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #444;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .recording-item button {
+            margin-left: 10px;
+            padding: 5px 10px;
+        }
+		.piano {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="note-display" id="noteDisplay">Press a key to play</div>
+<div class="controls">
+    <button id="darkModeToggle">Toggle Dark Mode</button>
+    <button id="recordButton">Record</button>
+    <button id="playButton">Play</button>
+    <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="0.3">
+</div>
+<div class="piano" id="piano"></div>
+<div class="recording-list" id="recordingList"></div>
+<div class="toggle-ref" id="toggleButton" onclick="toggleReference()">&#9654;</div>
+<div class="key-reference" id="keyReference">
+    <p><strong>Key - Note</strong></p>
+</div>
+
+<script>
+    const noteDisplay = document.getElementById('noteDisplay');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const keyReference = document.getElementById('keyReference');
+    const toggleButton = document.getElementById('toggleButton');
+    const piano = document.getElementById('piano');
+    const recordButton = document.getElementById('recordButton');
+    const playButton = document.getElementById('playButton');
+    const volumeControl = document.getElementById('volumeControl');
+	const keysPressed = new Set();
+    
+    // Initialize recording variables
+    let isRecording = false;
+    let recordedNotes = [];
+    let currentRecordingName = '';
+
+    const notes = [
+        { key: 'Z', note: 'C2', frequency: 65.41 }, { key: 'S', note: 'C#2', frequency: 69.30 },
+        { key: 'X', note: 'D2', frequency: 73.42 }, { key: 'D', note: 'D#2', frequency: 77.78 },
+        { key: 'C', note: 'E2', frequency: 82.41 }, { key: 'V', note: 'F2', frequency: 87.31 },
+        { key: 'G', note: 'F#2', frequency: 92.50 }, { key: 'B', note: 'G2', frequency: 98.00 },
+        { key: 'H', note: 'G#2', frequency: 103.83 }, { key: 'N', note: 'A2', frequency: 110.00 },
+        { key: 'J', note: 'A#2', frequency: 116.54 }, { key: 'M', note: 'B2', frequency: 123.47 },
+        { key: 'Q', note: 'C3', frequency: 130.81 }, { key: '2', note: 'C#3', frequency: 138.59 },
+        { key: 'W', note: 'D3', frequency: 146.83 }, { key: '3', note: 'D#3', frequency: 155.56 },
+        { key: 'E', note: 'E3', frequency: 164.81 }, { key: 'R', note: 'F3', frequency: 174.61 },
+        { key: '5', note: 'F#3', frequency: 185.00 }, { key: 'T', note: 'G3', frequency: 196.00 },
+        { key: '6', note: 'G#3', frequency: 207.65 }, { key: 'Y', note: 'A3', frequency: 220.00 },
+        { key: '7', note: 'A#3', frequency: 233.08 }, { key: 'U', note: 'B3', frequency: 246.94 },
+        { key: 'I', note: 'C4', frequency: 261.63 }, { key: '9', note: 'C#4', frequency: 277.18 },
+        { key: 'O', note: 'D4', frequency: 293.66 }, { key: '0', note: 'D#4', frequency: 311.13 },
+        { key: 'P', note: 'E4', frequency: 329.63 }, { key: '[', note: 'F4', frequency: 349.23 },
+        { key: '=', note: 'F#4', frequency: 369.99 }, { key: ']', note: 'G4', frequency: 392.00 },
+		{ key: '\\', note: 'G#4', frequency: 415.30 }, { key: 'A', note: 'A4', frequency: 440.00 },
+		{ key: 'K', note: 'A#4', frequency: 466.16 }
+    ];
+
+    let recordings = JSON.parse(localStorage.getItem('recordings') || '{}');
+	
+	function createEnvelope(gainNode, now) {
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.8, now + 0.02);
+        gainNode.gain.linearRampToValueAtTime(0.6, now + 0.1);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    }
+
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    let gainNode = audioContext.createGain();
+    gainNode.gain.value = 0.3;
+    gainNode.connect(audioContext.destination);
+
+    function playNote(frequency) {
+        const now = audioContext.currentTime;
+        const oscillator = audioContext.createOscillator();
+        const noteGain = audioContext.createGain();
+        
+        // Tạo âm thanh tự nhiên hơn bằng cách kết hợp các dạng sóng
+        const realWaveform = new Float32Array([0, 0.4, 0.4, 1, 0.3, 0.2, 0.1]);
+        const imagWaveform = new Float32Array(realWaveform.length);
+        const wave = audioContext.createPeriodicWave(realWaveform, imagWaveform);
+        
+        oscillator.setPeriodicWave(wave);
+        oscillator.frequency.setValueAtTime(frequency, now);
+
+        oscillator.connect(noteGain);
+        noteGain.connect(gainNode);
+        
+        createEnvelope(noteGain, now);
+        
+        oscillator.start(now);
+        oscillator.stop(now + 0.5);
+    }
+
+    function createPianoKeys() {
+        notes.forEach(({ note }) => {
+            const key = document.createElement('div');
+            key.classList.add('key', note.includes('#') ? 'black' : 'white');
+            key.dataset.note = note;
+            key.textContent = note;
+			
+			key.addEventListener('mousedown', (e) => {
+                e.preventDefault(); // Ngăn chọn văn bản
+                playNoteWithVisual(note);
+            });
+            
+            key.addEventListener('mouseup', () => removeKeyVisual(note));
+            key.addEventListener('mouseleave', () => removeKeyVisual(note));
+            
+            piano.appendChild(key);
+        });
+    }
+	
+	function playNoteWithVisual(noteId) {
+        const noteData = notes.find(n => n.note === noteId);
+        if (noteData) {
+            // Phát âm thanh
+            playNote(noteData.frequency);
+            // Hiển thị note
+            noteDisplay.textContent = `Note: ${noteData.note} (${noteData.frequency} Hz)`;
+            // Hiệu ứng phím
+            const key = document.querySelector(`[data-note="${noteId}"]`);
+			if (key && !key.classList.contains('active')) {
+                key.classList.add('active');
+            }
+            // Ghi âm nếu đang trong chế độ ghi
+            if (isRecording) {
+                recordedNotes.push({ note: noteData.note, time: Date.now() });
+            }
+        }
+    }
+	
+	function removeKeyVisual(noteId) {
+        const key = document.querySelector(`[data-note="${noteId}"]`);
+        if (key) key.classList.remove('active');
+    }
+
+    document.addEventListener('keydown', (event) => {
+        // Ngăn hành vi mặc định của trình duyệt
+        event.preventDefault();
+        
+        // Kiểm tra xem phím đã được nhấn chưa để tránh lặp lại
+        const key = event.key.toUpperCase();
+        if (keysPressed.has(key)) return;
+        
+        // Thêm phím vào danh sách đang được nhấn
+        keysPressed.add(key);
+        
+        const note = notes.find(n => n.key === key);
+        if (note) {
+            playNoteWithVisual(note.note);
+        }
+    });
+	
+	document.addEventListener('keyup', (event) => {
+        const key = event.key.toUpperCase();
+        // Xóa phím khỏi danh sách đang được nhấn
+        keysPressed.delete(key);
+        
+        const note = notes.find(n => n.key === key);
+        if (note) {
+            removeKeyVisual(note.note);
+        }
+    });
+	
+	// Xử lý khi cửa sổ mất focus
+    window.addEventListener('blur', () => {
+        // Đặt lại tất cả các phím về trạng thái bình thường
+        keysPressed.clear();
+        document.querySelectorAll('.key.active').forEach(key => {
+            key.classList.remove('active');
+        });
+    });
+	
+	recordButton.addEventListener('click', () => {
+        if (!isRecording) {
+            // Bắt đầu ghi âm mới
+            currentRecordingName = prompt('Enter a name for this recording:');
+            if (!currentRecordingName) return;
+            
+            recordedNotes = [];
+            isRecording = true;
+            recordButton.textContent = 'Stop Recording';
+        } else {
+            // Kết thúc ghi âm
+            isRecording = false;
+            recordButton.textContent = 'Record';
+            
+            if (recordedNotes.length > 0) {
+                recordings[currentRecordingName] = recordedNotes;
+                localStorage.setItem('recordings', JSON.stringify(recordings));
+                updateRecordingsList();
+            }
+        }
+    });
+	
+	function updateRecordingsList() {
+        const recordingList = document.getElementById('recordingList');
+        recordingList.innerHTML = '';
+        
+        Object.entries(recordings).forEach(([name, notes]) => {
+            const item = document.createElement('div');
+            item.className = 'recording-item';
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = name;
+            
+            const playBtn = document.createElement('button');
+            playBtn.textContent = 'Play';
+            playBtn.onclick = () => playRecording(notes);
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.onclick = () => {
+                delete recordings[name];
+                localStorage.setItem('recordings', JSON.stringify(recordings));
+                updateRecordingsList();
+            };
+            
+            item.appendChild(nameSpan);
+            item.appendChild(playBtn);
+            item.appendChild(deleteBtn);
+            recordingList.appendChild(item);
+        });
+    }
+	
+	function playRecording(notes) {
+        if (notes.length === 0) return;
+        const startTime = notes[0].time;
+        notes.forEach((record) => {
+            const delay = record.time - startTime;
+            setTimeout(() => {
+                playNoteWithVisual(record.note);
+                setTimeout(() => removeKeyVisual(record.note), 200);
+            }, delay);
+        });
+    }
+
+    darkModeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    });
+
+    playButton.addEventListener('click', () => {
+        if (recordedNotes.length === 0) return;
+        playRecording(recordedNotes);
+    });
+
+    volumeControl.addEventListener('input', (event) => {
+        gainNode.gain.value = event.target.value;
+    });
+
+    function toggleReference() {
+        const isHidden = keyReference.style.display === 'none' || keyReference.style.display === '';
+        keyReference.style.display = isHidden ? 'block' : 'none';
+        toggleButton.textContent = isHidden ? '◀' : '▶';
+    }
+
+    notes.forEach(({ key, note }) => {
+        const p = document.createElement('p');
+        p.textContent = `${key} - ${note}`;
+        keyReference.appendChild(p);
+    });
+
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+    }
+
+    createPianoKeys();
+	updateRecordingsList();
+</script>
+</body>
+</html>
