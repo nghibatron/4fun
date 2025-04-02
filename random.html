@@ -5,113 +5,195 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trình tạo số ngẫu nhiên</title>
     <style>
+        /* --- Reset & Base Styles --- */
+        * {
+            box-sizing: border-box; /* Tính cả padding, border vào kích thước */
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; /* Font hệ thống */
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* Align top để không bị kéo giãn khi container ngắn */
             min-height: 100vh;
-            margin: 0;
             background-color: #f4f4f4;
             transition: background-color 0.3s, color 0.3s;
-            padding-top: 60px;
-            padding-bottom: 20px;
+            padding: 20px 10px; /* Thêm padding ngang cho body */
         }
 
         body.dark-mode {
-            background-color: #333;
-            color: #f4f4f4;
+            background-color: #2c2c2c; /* Màu nền tối hơn chút */
+            color: #e0e0e0; /* Màu chữ sáng hơn */
         }
 
+        /* --- Container & Layout --- */
         .container {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column; /* Mặc định xếp chồng, dễ cho mobile trước */
             background: white;
-            padding: 20px;
+            padding: 15px; /* Padding nhỏ hơn cho mobile */
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 700px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%; /* Chiếm toàn bộ chiều rộng trên mobile */
+            max-width: 650px; /* Giới hạn chiều rộng trên desktop */
             position: relative;
         }
 
         body.dark-mode .container {
-            background: #444;
+            background: #3a3a3a; /* Nền container tối */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .content {
             display: flex;
             flex-direction: column;
             align-items: center;
-            flex: 1;
-            min-width: 250px;
-            padding-right: 15px;
+            width: 100%; /* Chiếm toàn bộ chiều rộng container */
+            order: 1; /* Đảm bảo content luôn ở trên */
         }
-
-        .input-section {
-            margin-bottom: 15px;
-            width: 100%;
-            text-align: center;
-        }
-        .input-section label{
-             margin: 0 5px;
-        }
-         .input-section input[type="number"] {
-            width: 60px;
-            padding: 8px;
-            margin-right: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-         }
-         body.dark-mode .input-section input[type="number"] {
-             background-color: #555;
-             border-color: #666;
-             color: #f4f4f4;
-         }
-
-        .main-number {
-            margin: 10px 0 20px 0;
-            text-align: center;
-            min-height: 70px; /* Giữ không gian ngay cả khi chưa có số */
-        }
-
-        .main-number h1 {
-            font-size: 48px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            word-wrap: break-word;
-        }
-
-        /* Đã xóa CSS cho #copyButton */
 
         .history-section {
-            width: 200px;
-            margin-left: 15px;
-            border-left: 1px solid #eee;
-            padding-left: 15px;
+            width: 100%; /* Chiếm toàn bộ chiều rộng container */
+            margin-top: 25px; /* Khoảng cách với content */
+            padding-top: 15px; /* Khoảng cách với đường kẻ */
+            border-top: 1px solid #e0e0e0; /* Đường kẻ phân cách */
+            order: 2; /* Đảm bảo history ở dưới */
         }
         body.dark-mode .history-section {
-             border-left-color: #555;
+            border-top-color: #555;
         }
-        @media (max-width: 600px) {
-            .history-section {
-                width: 100%;
-                margin-left: 0;
-                border-left: none;
-                border-top: 1px solid #eee;
-                padding-left: 0;
-                padding-top: 15px;
-                margin-top: 15px;
-            }
-             body.dark-mode .history-section {
-                border-top-color: #555;
-             }
-            .container { flex-direction: column; }
-            .content { padding-right: 0; }
+        .history-section h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            color: #555;
+        }
+         body.dark-mode .history-section h2 {
+            color: #bbb;
+         }
+
+        /* --- Input Section (Mobile First) --- */
+        .input-section {
+            display: flex;
+            flex-wrap: wrap; /* Cho phép các item xuống dòng */
+            justify-content: center; /* Căn giữa các item */
+            gap: 10px; /* Khoảng cách giữa các item */
+            width: 100%;
+            margin-bottom: 20px;
         }
 
+        .input-group { /* Nhóm label và input lại */
+            display: flex;
+            flex-direction: column; /* Label trên, input dưới */
+            align-items: center;
+            flex-grow: 1; /* Cho phép các group co giãn */
+            min-width: 100px; /* Chiều rộng tối thiểu */
+        }
+
+        .input-section label {
+            font-size: 0.9em;
+            margin-bottom: 4px;
+            color: #666;
+        }
+         body.dark-mode .input-section label {
+            color: #ccc;
+         }
+
+        .input-section input[type="number"] {
+            width: 80px; /* Rộng hơn chút */
+            padding: 10px; /* Padding lớn hơn */
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 1em;
+        }
+        body.dark-mode .input-section input[type="number"] {
+            background-color: #555;
+            border-color: #666;
+            color: #e0e0e0;
+        }
+        /* Loại bỏ mũi tên tăng giảm mặc định của trình duyệt */
+        .input-section input[type=number]::-webkit-outer-spin-button,
+        .input-section input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .input-section input[type=number] {
+            -moz-appearance: textfield; /* Firefox */
+        }
+
+        .button-group { /* Nhóm các nút lại */
+            display: flex;
+            justify-content: center;
+            width: 100%; /* Chiếm cả hàng */
+            gap: 10px; /* Khoảng cách giữa các nút */
+            margin-top: 10px; /* Khoảng cách với input */
+        }
+
+        /* --- Buttons --- */
+        button {
+            padding: 12px 20px; /* Padding lớn hơn cho dễ chạm */
+            border: none;
+            border-radius: 6px; /* Bo tròn nhẹ */
+            font-size: 1em; /* Cỡ chữ tương đối */
+            font-weight: 600; /* Đậm hơn chút */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            flex-grow: 1; /* Cho các nút tự chia sẻ không gian */
+            max-width: 180px; /* Giới hạn độ rộng tối đa của nút */
+        }
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        button:active {
+			transform: translateY(0);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            opacity: 0.95;
+		}
+        button:disabled {
+            background-color: #cccccc !important; /* Dùng !important để ghi đè */
+            color: #888 !important;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        body.dark-mode button:disabled {
+            background-color: #555 !important;
+            color: #999 !important;
+        }
+
+        #generateButton { background-color: #28a745; }
+        #generateButton:hover:not(:disabled) { background-color: #218838; }
+
+        #resetButton { background-color: #dc3545; }
+		#resetButton:hover:not(:disabled) { background-color: #c82333; }
+
+        /* --- Main Number Display --- */
+        .main-number {
+            margin: 10px 0 25px 0;
+            text-align: center;
+            min-height: 60px; /* Giữ không gian */
+            width: 100%;
+        }
+        .main-number h1 {
+            font-size: 2.8em; /* Cỡ chữ lớn hơn chút, dùng em cho linh hoạt */
+            font-weight: bold;
+            color: #333;
+            word-wrap: break-word;
+            line-height: 1.2; /* Đảm bảo chiều cao dòng */
+        }
+        body.dark-mode .main-number h1 {
+            color: #f0f0f0;
+        }
+
+        /* --- History List --- */
         .history-list {
-            max-height: 250px;
+            max-height: 200px; /* Giới hạn chiều cao */
             overflow-y: auto;
             border: 1px solid #ddd;
             padding: 10px;
@@ -119,80 +201,131 @@
             background: #fff;
             transition: background-color 0.3s, border-color 0.3s;
         }
-
         body.dark-mode .history-list {
-            background: #555;
+            background: #4f4f4f;
             border-color: #666;
         }
-
-        button {
-            padding: 10px 15px;
-            margin: 5px;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        button:hover {
-            transform: translateY(-1px);
-        }
-        button:active {
-			transform: translateY(0);
-            opacity: 0.9;
-		}
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        body.dark-mode button:disabled {
-            background-color: #555;
-            color: #aaa;
-        }
-
-        #generateButton { background-color: #28a745; }
-        #generateButton:hover:not(:disabled) { background-color: #218838; }
-
-        #resetButton { background-color: #dc3545; }
-		#resetButton:hover { background-color: #c82333; }
-
         #historyList p {
-            margin: 5px 0;
-            font-size: 14px;
+            margin-bottom: 8px; /* Khoảng cách giữa các số trong lịch sử */
+            font-size: 0.95em;
             word-break: break-all;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed #eee; /* Phân cách nhẹ nhàng */
+            text-align: center; /* Căn giữa số trong lịch sử */
+        }
+        #historyList p:last-child {
+            margin-bottom: 0;
+            border-bottom: none; /* Bỏ đường kẻ cho item cuối */
+        }
+        body.dark-mode #historyList p {
+            border-bottom-color: #666;
         }
 
+
+        /* --- Mode Toggle --- */
         .mode-toggle {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 14px;
+            top: 10px;
+            right: 10px;
+            font-size: 0.85em;
+            display: flex; /* Để label và select thẳng hàng */
+            align-items: center; /* Căn giữa theo chiều dọc */
         }
-         .mode-toggle select {
-            padding: 3px;
-            margin-left: 5px;
+         .mode-toggle label {
+            margin-right: 5px;
+            color: #555;
          }
+         body.dark-mode .mode-toggle label {
+             color: #bbb;
+         }
+         .mode-toggle select {
+            padding: 4px 6px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 0.9em;
+         }
+          body.dark-mode .mode-toggle select {
+            background-color: #555;
+            border-color: #666;
+            color: #e0e0e0;
+          }
 
+         /* --- Message Area --- */
          #message-area {
-            min-height: 1.2em;
-            margin-top: 10px;
-            font-size: 14px;
+            min-height: 1.3em;
+            margin-bottom: 15px; /* Khoảng cách với số chính */
+            font-size: 0.9em;
             text-align: center;
             width: 100%;
+            font-weight: 500;
          }
-         .message-error { color: #dc3545; font-weight: bold; }
-         .message-info { color: #17a2b8; }
-         body.dark-mode .message-error { color: #ff687b; }
-         body.dark-mode .message-info { color: #63d9ec; }
+         .message-error { color: #d93025; } /* Màu đỏ đậm hơn */
+         .message-info { color: #1a73e8; } /* Màu xanh dương */
+         body.dark-mode .message-error { color: #ff7b7b; }
+         body.dark-mode .message-info { color: #8ab4f8; }
+
+        /* --- Desktop Adjustments (Overrides) --- */
+        @media (min-width: 650px) { /* Áp dụng cho màn hình rộng hơn 650px */
+            .container {
+                flex-direction: row; /* Quay lại bố cục hàng ngang */
+                padding: 25px; /* Padding lớn hơn */
+            }
+
+            .content {
+                flex: 1; /* Cho content chiếm phần lớn */
+                padding-right: 25px; /* Khoảng cách với history */
+                align-items: center; /* Căn giữa lại nếu cần */
+            }
+
+            .history-section {
+                flex: 0 0 220px; /* Chiều rộng cố định cho history, không co giãn */
+                margin-top: 0; /* Bỏ margin top */
+                padding-top: 0;
+                border-top: none; /* Bỏ đường kẻ trên */
+                border-left: 1px solid #e0e0e0; /* Thêm lại đường kẻ trái */
+                padding-left: 25px; /* Padding trái */
+                order: 2; /* Vẫn giữ thứ tự */
+            }
+            body.dark-mode .history-section {
+                border-left-color: #555;
+            }
+            .history-section h2 {
+                 text-align: left; /* Căn trái tiêu đề history */
+            }
+             .history-list {
+                max-height: 300px; /* Tăng chiều cao history trên desktop */
+             }
+             #historyList p {
+                text-align: left; /* Căn trái số trong lịch sử */
+             }
+
+            .input-section {
+                justify-content: space-around; /* Phân bố đều input và nút */
+                gap: 15px; /* Tăng khoảng cách */
+            }
+            .input-group {
+                flex-direction: row; /* Label và input cùng hàng */
+                align-items: center;
+                min-width: auto; /* Bỏ min-width */
+            }
+            .input-section label {
+                 margin-bottom: 0; /* Bỏ margin bottom của label */
+                 margin-right: 8px; /* Thêm margin phải cho label */
+            }
+            .button-group {
+                width: auto; /* Không chiếm cả hàng nữa */
+                margin-top: 0;
+            }
+             button {
+                 flex-grow: 0; /* Không cho nút co giãn nữa */
+                 max-width: none; /* Bỏ giới hạn chiều rộng */
+             }
+        }
 
     </style>
 </head>
 <body>
+    <!-- HTML vẫn giữ nguyên như trước -->
     <div class="container">
         <div class="mode-toggle">
             <label for="mode">Mode:</label>
@@ -203,17 +336,22 @@
         </div>
         <div class="content">
             <div class="input-section">
-                <label for="min">Min:</label>
-                <input type="number" id="min" name="min" value="1">
-                <label for="max">Max:</label>
-                <input type="number" id="max" name="max" value="100">
-                <button id="generateButton">GO</button>
-                <button id="resetButton">Reset All</button>
+                <div class="input-group">
+                     <label for="min">Min:</label>
+                     <input type="number" id="min" name="min" value="1">
+                </div>
+                 <div class="input-group">
+                     <label for="max">Max:</label>
+                     <input type="number" id="max" name="max" value="100">
+                 </div>
+                 <div class="button-group">
+                    <button id="generateButton">GO</button>
+                    <button id="resetButton">Reset All</button>
+                </div>
             </div>
             <div id="message-area"></div>
             <div class="main-number">
                 <h1 id="currentNumber"></h1>
-                <!-- Đã xóa nút copy ở đây -->
             </div>
         </div>
         <div class="history-section">
@@ -221,7 +359,9 @@
             <div class="history-list" id="historyList"></div>
         </div>
     </div>
-    <script>
+
+    <!-- JavaScript vẫn giữ nguyên như phiên bản trước (không có nút copy) -->
+     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Lấy các phần tử DOM cần thiết
             const generateButton = document.getElementById('generateButton');
@@ -232,7 +372,6 @@
             const modeSelect = document.getElementById('mode');
             const resetButton = document.getElementById('resetButton');
             const messageArea = document.getElementById('message-area');
-            // Đã xóa biến copyButton
             const body = document.body;
 
             // Biến trạng thái
@@ -244,6 +383,8 @@
             function getRandomInt(min, max) {
                 min = Math.ceil(min);
                 max = Math.floor(max);
+                // Đảm bảo max >= min trước khi tính toán
+                if (max < min) return min; // Hoặc xử lý lỗi khác nếu cần
                 return Math.floor(Math.random() * (max - min + 1)) + min;
             }
 
@@ -261,6 +402,11 @@
                 const historyItem = document.createElement('p');
                 historyItem.textContent = number;
                 historyList.insertBefore(historyItem, historyList.firstChild);
+                // Giới hạn số lượng item trong history để tránh localStorage quá tải (tùy chọn)
+                const maxHistoryItems = 100;
+                while (historyList.children.length > maxHistoryItems) {
+                    historyList.removeChild(historyList.lastChild);
+                }
                 localStorage.setItem('history', historyList.innerHTML);
             }
 
@@ -270,7 +416,6 @@
                 historyList.innerHTML = '';
                 currentNumberDisplay.textContent = '';
                 clearMessage();
-                // Đã xóa các dòng liên quan đến copyButton
                 generateButton.disabled = false;
                 lastMin = null;
                 lastMax = null;
@@ -280,6 +425,8 @@
                 localStorage.removeItem('lastMin');
                 localStorage.removeItem('lastMax');
                 console.log("Data cleared.");
+                // Cập nhật lại trạng thái nút GO sau khi reset
+                validateRangeAndMaybeDisableGo();
             }
 
             function loadState() {
@@ -293,17 +440,14 @@
                 // Tải Mode
                 if (savedMode) {
                     modeSelect.value = savedMode;
-                    if (savedMode === 'dark') {
-                        body.classList.add('dark-mode');
-                    }
+                    body.classList.toggle('dark-mode', savedMode === 'dark');
                 } else {
-                     localStorage.setItem('mode', 'light');
+                     localStorage.setItem('mode', 'light'); // Đặt mặc định nếu chưa có
                 }
 
                 // Tải số hiện tại
                 if (savedCurrentNumber) {
                     currentNumberDisplay.textContent = savedCurrentNumber;
-                    // Đã xóa dòng hiển thị nút copy
                 }
 
                 // Tải Lịch sử
@@ -318,27 +462,20 @@
                         generatedNumbers = new Set(parsedNumbers);
                     } catch (e) {
                         console.error("Failed to parse saved generated numbers:", e);
-                        // Fallback: Tái tạo từ history nếu có
                         if (savedHistory) {
                              console.warn("Reconstructing set from history due to parsing error.");
                              Array.from(historyList.children).forEach(item => {
                                 const num = parseInt(item.textContent);
-                                if (!isNaN(num)) {
-                                    generatedNumbers.add(num);
-                                }
+                                if (!isNaN(num)) { generatedNumbers.add(num); }
                              });
-                             // Lưu lại Set vừa tái tạo
                             localStorage.setItem('generatedNumbers', JSON.stringify(Array.from(generatedNumbers)));
                         }
                     }
                 } else if (savedHistory) {
-                    // Nếu không có set lưu nhưng có history, tái tạo từ history
                      console.warn("No saved generatedNumbers found, reconstructing from history.");
                      Array.from(historyList.children).forEach(item => {
                         const num = parseInt(item.textContent);
-                        if (!isNaN(num)) {
-                            generatedNumbers.add(num);
-                        }
+                        if (!isNaN(num)) { generatedNumbers.add(num); }
                      });
                     localStorage.setItem('generatedNumbers', JSON.stringify(Array.from(generatedNumbers)));
                 }
@@ -347,68 +484,97 @@
                 if (savedLastMin !== null) lastMin = parseInt(savedLastMin);
                 if (savedLastMax !== null) lastMax = parseInt(savedLastMax);
 
+                // Khôi phục giá trị input nếu có thể (tùy chọn)
+                // if (lastMin !== null) minInput.value = lastMin;
+                // if (lastMax !== null) maxInput.value = lastMax;
+
                 // Kiểm tra lại trạng thái nút GO
                 validateRangeAndMaybeDisableGo();
 
                 console.log("State loaded. Generated numbers count:", generatedNumbers.size);
             }
 
-            function validateRangeAndMaybeDisableGo() {
+             function validateRangeAndMaybeDisableGo() {
                 const min = parseInt(minInput.value);
                 const max = parseInt(maxInput.value);
                 let isDisabled = false;
                 let message = '';
                 let messageType = 'error';
 
-                if (isNaN(min) || isNaN(max) || min > max) {
+                 // Chỉ hiển thị thông báo lỗi range nếu input không trống
+                if ((minInput.value !== '' && isNaN(min)) || (maxInput.value !== '' && isNaN(max))) {
+                     message = 'Vui lòng nhập số hợp lệ.';
+                     isDisabled = true;
+                } else if (!isNaN(min) && !isNaN(max) && min > max) {
                     message = 'Min phải nhỏ hơn hoặc bằng Max.';
                     isDisabled = true;
-                } else {
+                } else if (!isNaN(min) && !isNaN(max)) { // Chỉ kiểm tra hết số khi range hợp lệ
                     const rangeSize = max - min + 1;
-                    // Chỉ kiểm tra hết số khi range không đổi so với lần cuối tạo số
+                    // Chỉ kiểm tra hết số khi range không đổi
                     if (generatedNumbers.size >= rangeSize && min === lastMin && max === lastMax) {
                         message = 'Đã tạo hết số duy nhất trong khoảng này.';
                         messageType = 'info';
                         isDisabled = true;
                     } else {
-                        isDisabled = false; // Bật nút nếu range hợp lệ và chưa hết số
+                        isDisabled = false; // Range hợp lệ và chưa hết số
                     }
+                } else {
+                    // Nếu một trong hai ô input trống nhưng hợp lệ thì vẫn cho phép nhấn GO
+                    isDisabled = false;
                 }
+
 
                 generateButton.disabled = isDisabled;
                 if (message) {
                     showMessage(message, messageType);
                 } else if (!isDisabled) {
-                    clearMessage(); // Xóa thông báo cũ nếu range hợp lệ
+                    // Xóa thông báo cũ nếu range hợp lệ và không có thông báo đặc biệt
+                    // và không phải đang hiển thị thông báo "hết số" từ lần trước
+                     if (messageArea.className !== 'message-info' || generatedNumbers.size < (max - min + 1) || min !== lastMin || max !== lastMax) {
+                           clearMessage();
+                     }
                 }
             }
 
+
             // --- Trình xử lý sự kiện ---
             generateButton.addEventListener('click', () => {
-                const min = parseInt(minInput.value);
-                const max = parseInt(maxInput.value);
+                const minStr = minInput.value.trim();
+                const maxStr = maxInput.value.trim();
 
-                // Xử lý thay đổi range
-                if (min !== lastMin || max !== lastMax) {
-                    console.log("Range changed.");
-                    generatedNumbers.clear();
-                    lastMin = null;
-                    lastMax = null;
-                    localStorage.setItem('generatedNumbers', JSON.stringify([]));
-                    clearMessage();
-                    generateButton.disabled = false;
-                }
+                 // Lấy giá trị, coi ô trống là không hợp lệ ở bước này
+                 if (minStr === '' || maxStr === '') {
+                     showMessage('Vui lòng nhập cả Min và Max.');
+                     generateButton.disabled = true; // Vô hiệu hóa nếu thiếu input
+                     return;
+                 }
 
-                // Validate lại
+                const min = parseInt(minStr);
+                const max = parseInt(maxStr);
+
+
+                // Validate lại trước khi tạo số
                 if (isNaN(min) || isNaN(max) || min > max) {
-                    showMessage('Min phải nhỏ hơn hoặc bằng Max.');
-                    generateButton.disabled = true;
+                    validateRangeAndMaybeDisableGo(); // Hiển thị lỗi qua hàm validate
                     return;
                 }
 
+                 // Xử lý thay đổi range (quan trọng: chỉ reset Set nếu range *thực sự thay đổi* so với lần tạo số thành công cuối cùng)
+                if ((min !== lastMin || max !== lastMax) && lastMin !== null) { // Chỉ reset nếu đã có lastMin/Max trước đó
+                    console.log("Range changed. Clearing number set for this range.");
+                    generatedNumbers.clear();
+                    localStorage.setItem('generatedNumbers', JSON.stringify([]));
+                     // Không reset lastMin/Max ở đây, sẽ được gán lại sau khi tạo số thành công
+                     // Xóa thông báo cũ (ví dụ: hết số của range cũ)
+                     clearMessage();
+                     // Bật lại nút GO vì range mới có thể hợp lệ
+                     generateButton.disabled = false;
+                }
+
+
                 const rangeSize = max - min + 1;
 
-                // Kiểm tra hết số
+                // Kiểm tra hết số (sau khi đã có thể reset set)
                 if (generatedNumbers.size >= rangeSize) {
                     showMessage('Đã tạo hết số duy nhất trong khoảng này.', 'info');
                     generateButton.disabled = true;
@@ -418,12 +584,12 @@
                 // Tạo số ngẫu nhiên duy nhất
                 let randomNumber;
                 let attempts = 0;
-                const maxAttempts = rangeSize * 2 + 10;
+                const maxAttempts = rangeSize * 3 + 20; // Tăng giới hạn thử phòng trường hợp range lớn
                 do {
                     randomNumber = getRandomInt(min, max);
                     attempts++;
                     if (attempts > maxAttempts) {
-                        console.error("Could not find a unique number after many attempts.");
+                        console.error("Could not find a unique number after many attempts. Range:", min, "-", max, "Set size:", generatedNumbers.size);
                         showMessage('Lỗi: Không thể tạo số duy nhất. Hãy thử Reset All.', 'error');
                         generateButton.disabled = true;
                         return;
@@ -434,18 +600,19 @@
                 generatedNumbers.add(randomNumber);
                 addToHistory(randomNumber);
                 currentNumberDisplay.textContent = randomNumber;
+                // Xóa thông báo lỗi/info có thể có từ trước
                 clearMessage();
-                // Đã xóa dòng hiển thị nút copy
 
                 // Lưu trạng thái
                 localStorage.setItem('currentNumber', randomNumber);
                 localStorage.setItem('generatedNumbers', JSON.stringify(Array.from(generatedNumbers)));
+                // Chỉ cập nhật lastMin/Max KHI tạo số thành công
                 lastMin = min;
                 lastMax = max;
                 localStorage.setItem('lastMin', lastMin);
                 localStorage.setItem('lastMax', lastMax);
 
-                // Kiểm tra lại sau khi thêm số
+                // Kiểm tra lại sau khi thêm số mới
                 validateRangeAndMaybeDisableGo();
             });
 
@@ -458,11 +625,10 @@
             modeSelect.addEventListener('change', (event) => {
                 const mode = event.target.value;
                 localStorage.setItem('mode', mode);
-                body.classList.toggle('dark-mode', mode === 'dark'); // Cách khác để thêm/xóa class
+                body.classList.toggle('dark-mode', mode === 'dark');
             });
 
-            // Đã xóa trình xử lý sự kiện cho copyButton
-
+            // Validate ngay khi người dùng nhập liệu
             minInput.addEventListener('input', validateRangeAndMaybeDisableGo);
             maxInput.addEventListener('input', validateRangeAndMaybeDisableGo);
 
