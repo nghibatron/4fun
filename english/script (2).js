@@ -19,9 +19,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const toggleModeBtn = document.getElementById("toggleMode");
 
     // API endpoints
-    const DICTIONARY_API_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/";
-    const TRANSLATE_API_URL = "https://api.mymemory.translated.net/get?q=";
+    //const DICTIONARY_API_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/";
+    //const TRANSLATE_API_URL = "https://api.mymemory.translated.net/get?q=";
 	
+	const GEMINI_API_KEY = "AIzaSyDJEVT_WNcSzu_PdWOcIVXMyJgXvddM6cw";
+    //const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${AIzaSyDJEVT_WNcSzu_PdWOcIVXMyJgXvddM6cw}";
+	const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1/models/YOUR_CORRECT_MODEL_NAME:generateContent";
+	//const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
     // Gradient variables
     let isDarkMode = false;
     let direction = 1;
@@ -205,42 +209,48 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 	
-	
+	async function fetchWordFromGemini(word) {
+        try {
+            const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+					contents: [{
+						parts: [{
+							text: `Define the English word '${word}', provide its phonetic transcription and an example sentence. Return the response in the format:\nWord: ${word}\nPhonetic: [phonetic transcription]\nDefinition: [clear definition]\nExample: [example sentence]`
+						}]
+					}]
+				})
+            });
+
+            const data = await response.json();
+             if (data.error) {
+            console.error("Gemini API Error:", data.error);
+            meaningElement.textContent = "Lỗi khi lấy dữ liệu.";
+            return;
+			}
+
+			const responseText = data.candidates[0].content.parts[0].text;
+			const lines = responseText.split('\n');
+        
+			wordElement.textContent = word;
+			phoneticElement.textContent = lines.find(line => line.startsWith('Phonetic:'))?.replace('Phonetic:', '').trim() || "Không có phiên âm";
+			meaningElement.textContent = lines.find(line => line.startsWith('Definition:'))?.replace('Definition:', '').trim() || "Không tìm thấy nghĩa.";
+		} catch (error) {
+			console.error("Lỗi khi lấy dữ liệu từ Gemini:", error);
+			meaningElement.textContent = "Lỗi khi lấy dữ liệu.";
+		}
+    }
 
     async function fetchRandomWord() {
         try {
-            wordElement.textContent = "Loading...";
-            phoneticElement.textContent = "";
-            meaningElement.textContent = "Đang lấy dữ liệu...";
-
-            const randomWordResponse = await fetch("https://random-word-api.herokuapp.com/word");
-            if (!randomWordResponse.ok) throw new Error("Không thể lấy từ vựng ngẫu nhiên.");
-
-            const randomWordData = await randomWordResponse.json();
-            const randomWord = randomWordData[0];
-
-            const response = await fetch(DICTIONARY_API_URL + randomWord);
-            if (!response.ok) {
-                return fetchRandomWord();
-            }
-
-            const data = await response.json();
-            const word = data[0].word;
-            const phonetic = data[0].phonetics.find(p => p.text)?.text || "Không có phiên âm";
-            const meanings = data[0].meanings
-                .map(meaning => `(${meaning.partOfSpeech}) ${meaning.definitions[0].definition}`)
-                .join("\n");
-
-            const translateResponse = await fetch(`${TRANSLATE_API_URL}${encodeURIComponent(meanings)}&langpair=en|vi`);
-            const translateData = await translateResponse.json();
-            const translatedMeaning = translateData.responseData.translatedText;
-
-            wordElement.textContent = word;
-            phoneticElement.textContent = phonetic;
-            meaningElement.textContent = `📝 ${translatedMeaning}`;
+            const response = await fetch("https://random-word-api.herokuapp.com/word");
+            if (!response.ok) throw new Error("Không thể lấy từ ngẫu nhiên.");
+            const wordData = await response.json();
+            const randomWord = wordData[0];
+            fetchWordFromGemini(randomWord);
         } catch (error) {
             console.error("Lỗi khi lấy từ vựng:", error);
-            return fetchRandomWord();
         }
     }
 

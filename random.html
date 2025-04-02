@@ -1,19 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Number Generator</title>
+    <title>Trình tạo số ngẫu nhiên</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             background-color: #f4f4f4;
             transition: background-color 0.3s, color 0.3s;
+            padding-top: 60px;
+            padding-bottom: 20px;
         }
 
         body.dark-mode {
@@ -23,11 +25,14 @@
 
         .container {
             display: flex;
+            flex-wrap: wrap;
             background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 80%;
+            width: 90%;
+            max-width: 700px;
+            position: relative;
         }
 
         body.dark-mode .container {
@@ -39,35 +44,80 @@
             flex-direction: column;
             align-items: center;
             flex: 1;
+            min-width: 250px;
+            padding-right: 15px;
         }
 
         .input-section {
-            margin: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+            text-align: center;
         }
+        .input-section label{
+             margin: 0 5px;
+        }
+         .input-section input[type="number"] {
+            width: 60px;
+            padding: 8px;
+            margin-right: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+         }
+         body.dark-mode .input-section input[type="number"] {
+             background-color: #555;
+             border-color: #666;
+             color: #f4f4f4;
+         }
 
         .main-number {
-            margin: 20px 0;
+            margin: 10px 0 20px 0;
             text-align: center;
+            min-height: 70px; /* Giữ không gian ngay cả khi chưa có số */
         }
 
         .main-number h1 {
             font-size: 48px;
             font-weight: bold;
+            margin-bottom: 5px;
+            word-wrap: break-word;
         }
+
+        /* Đã xóa CSS cho #copyButton */
 
         .history-section {
             width: 200px;
-            margin-left: 20px;
+            margin-left: 15px;
+            border-left: 1px solid #eee;
+            padding-left: 15px;
+        }
+        body.dark-mode .history-section {
+             border-left-color: #555;
+        }
+        @media (max-width: 600px) {
+            .history-section {
+                width: 100%;
+                margin-left: 0;
+                border-left: none;
+                border-top: 1px solid #eee;
+                padding-left: 0;
+                padding-top: 15px;
+                margin-top: 15px;
+            }
+             body.dark-mode .history-section {
+                border-top-color: #555;
+             }
+            .container { flex-direction: column; }
+            .content { padding-right: 0; }
         }
 
         .history-list {
-            max-height: 300px;
-            overflow-y: scroll;
+            max-height: 250px;
+            overflow-y: auto;
             border: 1px solid #ddd;
             padding: 10px;
             border-radius: 4px;
             background: #fff;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
         body.dark-mode .history-list {
@@ -76,51 +126,70 @@
         }
 
         button {
-            padding: 10px 20px;
-            margin-left: 10px;
+            padding: 10px 15px;
+            margin: 5px;
             border: none;
-            border-radius: 50%;
-            
+            border-radius: 4px;
             font-size: 16px;
             font-weight: bold;
             color: white;
-            background-color: #28a745;
             cursor: pointer;
-            transition: background-color 0.3s; transform 0.2s;
-			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, transform 0.2s;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-
         button:hover {
-            background-color: #218838;
-			transform: translateY(-2px);
+            transform: translateY(-1px);
         }
-		
-		.styled-button:active {
-			background-color: #1e7e34;
+        button:active {
 			transform: translateY(0);
+            opacity: 0.9;
 		}
-		
-		.reset-button {
-			background-color: #dc3545;
-		}
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        body.dark-mode button:disabled {
+            background-color: #555;
+            color: #aaa;
+        }
 
-		.reset-button:hover {
-			background-color: #c82333;
-		}
+        #generateButton { background-color: #28a745; }
+        #generateButton:hover:not(:disabled) { background-color: #218838; }
 
-		.reset-button:active {
-			background-color: #bd2130;
-		}
+        #resetButton { background-color: #dc3545; }
+		#resetButton:hover { background-color: #c82333; }
 
         #historyList p {
             margin: 5px 0;
+            font-size: 14px;
+            word-break: break-all;
         }
 
         .mode-toggle {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 15px;
+            right: 15px;
+            font-size: 14px;
         }
+         .mode-toggle select {
+            padding: 3px;
+            margin-left: 5px;
+         }
+
+         #message-area {
+            min-height: 1.2em;
+            margin-top: 10px;
+            font-size: 14px;
+            text-align: center;
+            width: 100%;
+         }
+         .message-error { color: #dc3545; font-weight: bold; }
+         .message-info { color: #17a2b8; }
+         body.dark-mode .message-error { color: #ff687b; }
+         body.dark-mode .message-info { color: #63d9ec; }
+
     </style>
 </head>
 <body>
@@ -135,18 +204,16 @@
         <div class="content">
             <div class="input-section">
                 <label for="min">Min:</label>
-                <input type="number" id="min" name="min" required>
+                <input type="number" id="min" name="min" value="1">
                 <label for="max">Max:</label>
-                <input type="number" id="max" name="max" required>
+                <input type="number" id="max" name="max" value="100">
                 <button id="generateButton">GO</button>
-                <p>Remaining Attempts: <span id="remainingAttempts">30</span></p>
-				<label for="limit">Set Custom Limit:</label>
-				<input type="number" id="limit" name="limit" min="1">
-				<button id="setLimitButton">Set Limit</button>
-				<button id="clearHistoryButton" class="styled-button reset-button">Clear History</button>
+                <button id="resetButton">Reset All</button>
             </div>
+            <div id="message-area"></div>
             <div class="main-number">
                 <h1 id="currentNumber"></h1>
+                <!-- Đã xóa nút copy ở đây -->
             </div>
         </div>
         <div class="history-section">
@@ -155,31 +222,39 @@
         </div>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
+        document.addEventListener('DOMContentLoaded', () => {
+            // Lấy các phần tử DOM cần thiết
             const generateButton = document.getElementById('generateButton');
             const minInput = document.getElementById('min');
             const maxInput = document.getElementById('max');
             const historyList = document.getElementById('historyList');
-            const remainingAttempts = document.getElementById('remainingAttempts');
-            const currentNumber = document.getElementById('currentNumber');
+            const currentNumberDisplay = document.getElementById('currentNumber');
             const modeSelect = document.getElementById('mode');
-			const limitInput = document.getElementById('limit');
-			const setLimitButton = document.getElementById('setLimitButton');
-			const clearHistoryButton = document.getElementById('clearHistoryButton');
+            const resetButton = document.getElementById('resetButton');
+            const messageArea = document.getElementById('message-area');
+            // Đã xóa biến copyButton
             const body = document.body;
 
-            let attempts = 30;
+            // Biến trạng thái
             let generatedNumbers = new Set();
+            let lastMin = null;
+            let lastMax = null;
 
+            // --- Các hàm tiện ích ---
             function getRandomInt(min, max) {
                 min = Math.ceil(min);
                 max = Math.floor(max);
                 return Math.floor(Math.random() * (max - min + 1)) + min;
             }
 
-            function updateRemainingAttempts() {
-                remainingAttempts.textContent = attempts;
-                localStorage.setItem('remainingAttempts', attempts);
+            function showMessage(text, type = 'error') {
+                messageArea.textContent = text;
+                messageArea.className = `message-${type}`;
+            }
+
+            function clearMessage() {
+                messageArea.textContent = '';
+                messageArea.className = '';
             }
 
             function addToHistory(number) {
@@ -189,104 +264,209 @@
                 localStorage.setItem('history', historyList.innerHTML);
             }
 
-            function reset() {
+            // --- Chức năng chính ---
+            function clearAllData() {
                 generatedNumbers.clear();
                 historyList.innerHTML = '';
-                attempts = parseInt(localStorage.getItem('limit')) || 30;
-                updateRemainingAttempts();
+                currentNumberDisplay.textContent = '';
+                clearMessage();
+                // Đã xóa các dòng liên quan đến copyButton
+                generateButton.disabled = false;
+                lastMin = null;
+                lastMax = null;
+                localStorage.removeItem('history');
+                localStorage.removeItem('currentNumber');
+                localStorage.removeItem('generatedNumbers');
+                localStorage.removeItem('lastMin');
+                localStorage.removeItem('lastMax');
+                console.log("Data cleared.");
             }
 
             function loadState() {
                 const savedHistory = localStorage.getItem('history');
-                const savedAttempts = localStorage.getItem('remainingAttempts');
                 const savedMode = localStorage.getItem('mode');
                 const savedCurrentNumber = localStorage.getItem('currentNumber');
-				const savedLimit = localStorage.getItem('limit');
+                const savedGeneratedNumbers = localStorage.getItem('generatedNumbers');
+                const savedLastMin = localStorage.getItem('lastMin');
+                const savedLastMax = localStorage.getItem('lastMax');
 
-                if (savedHistory) {
-                    historyList.innerHTML = savedHistory;
-                    Array.from(historyList.children).forEach(item => {
-                        generatedNumbers.add(parseInt(item.textContent));
-                    });
-                }
-
-                if (savedAttempts) {
-                    attempts = parseInt(savedAttempts);
-                    updateRemainingAttempts();
-                }
-
+                // Tải Mode
                 if (savedMode) {
                     modeSelect.value = savedMode;
                     if (savedMode === 'dark') {
                         body.classList.add('dark-mode');
                     }
+                } else {
+                     localStorage.setItem('mode', 'light');
                 }
 
+                // Tải số hiện tại
                 if (savedCurrentNumber) {
-                    currentNumber.textContent = savedCurrentNumber;
+                    currentNumberDisplay.textContent = savedCurrentNumber;
+                    // Đã xóa dòng hiển thị nút copy
                 }
-				
-				if (savedLimit) {
-					limitInput.value = savedLimit;
-				}
+
+                // Tải Lịch sử
+                if (savedHistory) {
+                     historyList.innerHTML = savedHistory;
+                }
+
+                 // Tải Set số đã tạo
+                 if (savedGeneratedNumbers) {
+                    try {
+                        const parsedNumbers = JSON.parse(savedGeneratedNumbers);
+                        generatedNumbers = new Set(parsedNumbers);
+                    } catch (e) {
+                        console.error("Failed to parse saved generated numbers:", e);
+                        // Fallback: Tái tạo từ history nếu có
+                        if (savedHistory) {
+                             console.warn("Reconstructing set from history due to parsing error.");
+                             Array.from(historyList.children).forEach(item => {
+                                const num = parseInt(item.textContent);
+                                if (!isNaN(num)) {
+                                    generatedNumbers.add(num);
+                                }
+                             });
+                             // Lưu lại Set vừa tái tạo
+                            localStorage.setItem('generatedNumbers', JSON.stringify(Array.from(generatedNumbers)));
+                        }
+                    }
+                } else if (savedHistory) {
+                    // Nếu không có set lưu nhưng có history, tái tạo từ history
+                     console.warn("No saved generatedNumbers found, reconstructing from history.");
+                     Array.from(historyList.children).forEach(item => {
+                        const num = parseInt(item.textContent);
+                        if (!isNaN(num)) {
+                            generatedNumbers.add(num);
+                        }
+                     });
+                    localStorage.setItem('generatedNumbers', JSON.stringify(Array.from(generatedNumbers)));
+                }
+
+                // Tải Min/Max cuối
+                if (savedLastMin !== null) lastMin = parseInt(savedLastMin);
+                if (savedLastMax !== null) lastMax = parseInt(savedLastMax);
+
+                // Kiểm tra lại trạng thái nút GO
+                validateRangeAndMaybeDisableGo();
+
+                console.log("State loaded. Generated numbers count:", generatedNumbers.size);
             }
 
+            function validateRangeAndMaybeDisableGo() {
+                const min = parseInt(minInput.value);
+                const max = parseInt(maxInput.value);
+                let isDisabled = false;
+                let message = '';
+                let messageType = 'error';
+
+                if (isNaN(min) || isNaN(max) || min > max) {
+                    message = 'Min phải nhỏ hơn hoặc bằng Max.';
+                    isDisabled = true;
+                } else {
+                    const rangeSize = max - min + 1;
+                    // Chỉ kiểm tra hết số khi range không đổi so với lần cuối tạo số
+                    if (generatedNumbers.size >= rangeSize && min === lastMin && max === lastMax) {
+                        message = 'Đã tạo hết số duy nhất trong khoảng này.';
+                        messageType = 'info';
+                        isDisabled = true;
+                    } else {
+                        isDisabled = false; // Bật nút nếu range hợp lệ và chưa hết số
+                    }
+                }
+
+                generateButton.disabled = isDisabled;
+                if (message) {
+                    showMessage(message, messageType);
+                } else if (!isDisabled) {
+                    clearMessage(); // Xóa thông báo cũ nếu range hợp lệ
+                }
+            }
+
+            // --- Trình xử lý sự kiện ---
             generateButton.addEventListener('click', () => {
-                const min = parseInt(minInput.value) || 1;
+                const min = parseInt(minInput.value);
                 const max = parseInt(maxInput.value);
 
-                if (isNaN(min) || isNaN(max) || min >= max) {
-                    alert('Please enter valid min and max values with min < max.');
+                // Xử lý thay đổi range
+                if (min !== lastMin || max !== lastMax) {
+                    console.log("Range changed.");
+                    generatedNumbers.clear();
+                    lastMin = null;
+                    lastMax = null;
+                    localStorage.setItem('generatedNumbers', JSON.stringify([]));
+                    clearMessage();
+                    generateButton.disabled = false;
+                }
+
+                // Validate lại
+                if (isNaN(min) || isNaN(max) || min > max) {
+                    showMessage('Min phải nhỏ hơn hoặc bằng Max.');
+                    generateButton.disabled = true;
                     return;
                 }
 
-                if (attempts > 0) {
-                    let randomNumber;
-                    do {
-                        randomNumber = getRandomInt(min, max);
-                    } while (generatedNumbers.has(randomNumber));
+                const rangeSize = max - min + 1;
 
-                    generatedNumbers.add(randomNumber);
-                    addToHistory(randomNumber);
-                    currentNumber.textContent = randomNumber;
-                    localStorage.setItem('currentNumber', randomNumber);
-                    attempts--;
-                    updateRemainingAttempts();
-                } else {
-                    alert('Max attempts reached. Resetting history.');
-                    reset();
+                // Kiểm tra hết số
+                if (generatedNumbers.size >= rangeSize) {
+                    showMessage('Đã tạo hết số duy nhất trong khoảng này.', 'info');
+                    generateButton.disabled = true;
+                    return;
+                }
+
+                // Tạo số ngẫu nhiên duy nhất
+                let randomNumber;
+                let attempts = 0;
+                const maxAttempts = rangeSize * 2 + 10;
+                do {
+                    randomNumber = getRandomInt(min, max);
+                    attempts++;
+                    if (attempts > maxAttempts) {
+                        console.error("Could not find a unique number after many attempts.");
+                        showMessage('Lỗi: Không thể tạo số duy nhất. Hãy thử Reset All.', 'error');
+                        generateButton.disabled = true;
+                        return;
+                    }
+                } while (generatedNumbers.has(randomNumber));
+
+                // Xử lý khi tạo số thành công
+                generatedNumbers.add(randomNumber);
+                addToHistory(randomNumber);
+                currentNumberDisplay.textContent = randomNumber;
+                clearMessage();
+                // Đã xóa dòng hiển thị nút copy
+
+                // Lưu trạng thái
+                localStorage.setItem('currentNumber', randomNumber);
+                localStorage.setItem('generatedNumbers', JSON.stringify(Array.from(generatedNumbers)));
+                lastMin = min;
+                lastMax = max;
+                localStorage.setItem('lastMin', lastMin);
+                localStorage.setItem('lastMax', lastMax);
+
+                // Kiểm tra lại sau khi thêm số
+                validateRangeAndMaybeDisableGo();
+            });
+
+            resetButton.addEventListener('click', () => {
+                if (confirm('Bạn có chắc muốn xóa toàn bộ lịch sử và đặt lại?')) {
+                    clearAllData();
                 }
             });
 
             modeSelect.addEventListener('change', (event) => {
                 const mode = event.target.value;
                 localStorage.setItem('mode', mode);
-                if (mode === 'dark') {
-                    body.classList.add('dark-mode');
-                } else {
-                    body.classList.remove('dark-mode');
-                }
+                body.classList.toggle('dark-mode', mode === 'dark'); // Cách khác để thêm/xóa class
             });
-			
-			setLimitButton.addEventListener('click', () => {
-				const limit = parseInt(limitInput.value);
-				if (isNaN(limit) || limit <= 0) {
-					alert('Please enter a valid number for the limit.');
-				} else {
-					localStorage.setItem('limit', limit);
-					attempts = limit;
-					updateRemainingAttempts();
-				}
-			});
-			
-			clearHistoryButton.addEventListener('click', () => {
-				if (confirm('Are you sure you want to clear the history?')) {
-					historyList.innerHTML = '';
-					generatedNumbers.clear();
-					localStorage.removeItem('history');
-				}
-			});
 
+            // Đã xóa trình xử lý sự kiện cho copyButton
+
+            minInput.addEventListener('input', validateRangeAndMaybeDisableGo);
+            maxInput.addEventListener('input', validateRangeAndMaybeDisableGo);
+
+            // Tải trạng thái khi trang được mở
             loadState();
         });
     </script>
