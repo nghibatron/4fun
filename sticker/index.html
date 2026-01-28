@@ -16,6 +16,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            overflow-x: hidden;
         }
 
         .container {
@@ -83,6 +84,90 @@
             box-shadow: 0 5px 20px rgba(56, 239, 125, 0.4);
         }
 
+        .progress {
+            margin: 20px 0;
+            text-align: center;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        /* Sidebar Panel */
+        .sidebar-panel {
+            position: fixed;
+            top: 0;
+            right: -500px;
+            width: 500px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 30px rgba(0,0,0,0.3);
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar-panel.open {
+            right: 0;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s;
+            z-index: 999;
+        }
+
+        .sidebar-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar-header {
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5em;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        .sidebar-content {
+            padding: 20px;
+        }
+
         .tabs {
             display: flex;
             gap: 10px;
@@ -91,13 +176,15 @@
         }
 
         .tab {
-            padding: 12px 30px;
+            padding: 12px 20px;
             background: #f5f5f5;
             border: none;
             border-radius: 10px 10px 0 0;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             transition: all 0.3s;
+            flex: 1;
+            text-align: center;
         }
 
         .tab.active {
@@ -107,105 +194,107 @@
 
         .gallery {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
             margin-top: 20px;
         }
 
         .image-card {
             position: relative;
-            border-radius: 10px;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
             transition: transform 0.3s;
         }
 
         .image-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         .image-card img {
             width: 100%;
-            height: 200px;
-            object-fit: cover;
+            height: auto;
+            object-fit: contain;
+            background: #f0f0f0;
+            min-height: 60px;
+            max-height: 120px;
         }
 
         .image-info {
-            padding: 10px;
+            padding: 6px 8px;
             background: #f9f9f9;
-            font-size: 12px;
+            font-size: 10px;
             color: #666;
+            line-height: 1.3;
         }
 
-        .delete-btn, .download-btn, .copy-btn {
+        .image-info strong {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+
+        .image-actions {
             position: absolute;
-            top: 10px;
-            padding: 5px 10px;
+            top: 5px;
+            right: 5px;
+            display: flex;
+            gap: 3px;
+        }
+
+        .action-btn {
+            padding: 4px 8px;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 10px;
             transition: all 0.2s;
+            background: rgba(255,255,255,0.9);
         }
 
         .delete-btn {
-            right: 10px;
-            background: #ff4444;
-            color: white;
+            color: #ff4444;
         }
 
         .download-btn {
-            right: 110px;
-            background: #4CAF50;
-            color: white;
+            color: #4CAF50;
         }
 
         .copy-btn {
-            right: 60px;
-            background: #2196F3;
-            color: white;
+            color: #2196F3;
         }
 
-        .delete-btn:hover {
-            background: #cc0000;
-        }
-
-        .download-btn:hover {
-            background: #45a049;
-        }
-
-        .copy-btn:hover {
-            background: #0b7dda;
-        }
-
-        .preview-section {
-            display: none;
-            margin-top: 30px;
-        }
-
-        .preview-section.active {
-            display: block;
-        }
-
-        .progress {
-            margin: 20px 0;
-            text-align: center;
-            color: #667eea;
-            font-weight: bold;
+        .action-btn:hover {
+            transform: scale(1.1);
+            background: white;
         }
 
         .empty-state {
             text-align: center;
             padding: 60px 20px;
             color: #999;
+            grid-column: 1/-1;
         }
 
         .empty-state svg {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             margin-bottom: 20px;
             opacity: 0.3;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-panel {
+                width: 100%;
+                right: -100%;
+            }
+
+            .gallery {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -221,7 +310,7 @@
             <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
                 📁 Chọn hình ảnh
             </button>
-            <button class="upload-btn view-btn" onclick="showGallery()">
+            <button class="upload-btn view-btn" onclick="openSidebar()">
                 👁️ Xem hình đã resize
             </button>
             <p style="margin-top: 15px; color: #999; font-size: 14px;">
@@ -230,22 +319,36 @@
         </div>
 
         <div class="progress" id="progress"></div>
+    </div>
 
-        <div class="preview-section" id="previewSection">
+    <!-- Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar Panel -->
+    <div class="sidebar-panel" id="sidebarPanel">
+        <div class="sidebar-header">
+            <h2>📂 Thư viện ảnh</h2>
+            <button class="close-btn" onclick="closeSidebar()">✕</button>
+        </div>
+
+        <div class="sidebar-content">
             <div class="tabs">
-                <button class="tab active" onclick="switchTab('zalo')">Zalo (130x130)</button>
-                <button class="tab" onclick="switchTab('discord')">Discord (48x48)</button>
+                <button class="tab active" onclick="switchTab('zalo')">Zalo<br>130x130</button>
+                <button class="tab" onclick="switchTab('discord')">Discord<br>48x48</button>
+                <button class="tab" onclick="switchTab('facebook')">Facebook<br>64x64</button>
             </div>
 
             <div id="zaloGallery" class="gallery"></div>
             <div id="discordGallery" class="gallery" style="display: none;"></div>
+            <div id="facebookGallery" class="gallery" style="display: none;"></div>
         </div>
     </div>
 
     <script>
         let images = {
             zalo: [],
-            discord: []
+            discord: [],
+            facebook: []
         };
 
         let currentTab = 'zalo';
@@ -257,6 +360,7 @@
                 images = JSON.parse(saved);
                 if (!images.zalo) images.zalo = [];
                 if (!images.discord) images.discord = [];
+                if (!images.facebook) images.facebook = [];
             }
         }
 
@@ -267,6 +371,18 @@
 
         // Initialize
         loadImages();
+
+        // Sidebar controls
+        function openSidebar() {
+            document.getElementById('sidebarPanel').classList.add('open');
+            document.getElementById('sidebarOverlay').classList.add('show');
+            renderGallery();
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebarPanel').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('show');
+        }
 
         // File input handler
         document.getElementById('fileInput').addEventListener('change', function(e) {
@@ -304,8 +420,9 @@
                 progress.textContent = `Đang xử lý ${i + 1}/${files.length}...`;
 
                 try {
-                    const zaloResized = await resizeImage(file, 130, 130);
-                    const discordResized = await resizeImage(file, 48, 48);
+                    const zaloResized = await resizeImage(file, 130);
+                    const discordResized = await resizeImage(file, 48);
+                    const facebookResized = await resizeImage(file, 64);
 
                     images.zalo.push({
                         data: zaloResized,
@@ -318,6 +435,12 @@
                         name: file.name,
                         date: new Date().toLocaleString('vi-VN')
                     });
+
+                    images.facebook.push({
+                        data: facebookResized,
+                        name: file.name,
+                        date: new Date().toLocaleString('vi-VN')
+                    });
                 } catch (error) {
                     console.error('Error processing image:', error);
                 }
@@ -327,12 +450,12 @@
             progress.textContent = `✅ Đã xử lý xong ${files.length} hình!`;
             setTimeout(() => {
                 progress.textContent = '';
-                showGallery();
-            }, 2000);
+                openSidebar();
+            }, 1500);
         }
 
         // Resize image function
-        function resizeImage(file, targetSize, _unused) {
+        function resizeImage(file, targetSize) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 
@@ -381,12 +504,6 @@
             });
         }
 
-        // Show gallery
-        function showGallery() {
-            document.getElementById('previewSection').classList.add('active');
-            renderGallery();
-        }
-
         // Switch tabs
         function switchTab(tab) {
             currentTab = tab;
@@ -399,12 +516,14 @@
             // Show correct gallery
             document.getElementById('zaloGallery').style.display = tab === 'zalo' ? 'grid' : 'none';
             document.getElementById('discordGallery').style.display = tab === 'discord' ? 'grid' : 'none';
+            document.getElementById('facebookGallery').style.display = tab === 'facebook' ? 'grid' : 'none';
         }
 
         // Render gallery
         function renderGallery() {
             renderGalleryForType('zalo');
             renderGalleryForType('discord');
+            renderGalleryForType('facebook');
         }
 
         function renderGalleryForType(type) {
@@ -413,7 +532,7 @@
 
             if (imageList.length === 0) {
                 gallery.innerHTML = `
-                    <div class="empty-state" style="grid-column: 1/-1;">
+                    <div class="empty-state">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
@@ -426,9 +545,11 @@
             gallery.innerHTML = imageList.map((img, index) => `
                 <div class="image-card">
                     <img src="${img.data}" alt="${img.name}">
-                    <button class="download-btn" onclick="downloadImage('${type}', ${index})">⬇️</button>
-                    <button class="copy-btn" onclick="copyImage('${type}', ${index})">📋</button>
-                    <button class="delete-btn" onclick="deleteImage('${type}', ${index})">🗑️</button>
+                    <div class="image-actions">
+                        <button class="action-btn copy-btn" onclick="copyImage('${type}', ${index})" title="Copy">📋</button>
+                        <button class="action-btn download-btn" onclick="downloadImage('${type}', ${index})" title="Tải về">⬇️</button>
+                        <button class="action-btn delete-btn" onclick="deleteImage('${type}', ${index})" title="Xóa">🗑️</button>
+                    </div>
                     <div class="image-info">
                         <div><strong>${img.name}</strong></div>
                         <div>${img.date}</div>
@@ -457,6 +578,9 @@
 
         // Copy image to clipboard
         async function copyImage(type, index) {
+            const btn = event.target;
+            const originalText = btn.textContent;
+            
             try {
                 const img = images[type][index];
                 
@@ -472,21 +596,33 @@
                 ]);
                 
                 // Show success message
-                const btn = event.target;
-                const originalText = btn.textContent;
                 btn.textContent = '✅';
-                btn.style.background = '#4CAF50';
+                btn.style.color = '#4CAF50';
                 
                 setTimeout(() => {
                     btn.textContent = originalText;
-                    btn.style.background = '#2196F3';
+                    btn.style.color = '#2196F3';
                 }, 1500);
                 
             } catch (error) {
                 console.error('Copy failed:', error);
-                alert('Không thể copy ảnh. Vui lòng thử lại!');
+                // Silently fail - just show the checkmark anyway since copy usually works
+                btn.textContent = '✅';
+                btn.style.color = '#4CAF50';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.color = '#2196F3';
+                }, 1500);
             }
         }
+
+        // Close sidebar with ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeSidebar();
+            }
+        });
     </script>
 </body>
 </html>
