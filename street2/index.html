@@ -415,7 +415,7 @@
     gap:10px;
     margin-bottom:8px;
   }
-  #street-input{
+  #street-input, #online-street-input{
     flex:1;
     min-width:0;
     font-family:'Oswald',sans-serif;
@@ -428,16 +428,20 @@
     background:var(--plate-blue);
     color:var(--white);
   }
-  #street-input::placeholder{
+  #street-input::placeholder, #online-street-input::placeholder{
     color:#a9c1d8;
     text-transform:none;
     font-family:'Be Vietnam Pro',sans-serif;
     font-size:14px;
     letter-spacing:normal;
   }
-  #street-input:focus{
+  #street-input:focus, #online-street-input:focus{
     outline:none;
     border-color:var(--brass);
+  }
+  #online-street-input:disabled{
+    opacity:0.6;
+    cursor:not-allowed;
   }
   .mic-btn{
     width:56px;
@@ -604,6 +608,7 @@
     <p id="storage-warning" class="storage-warning hidden">
       ⚠️ Không tải được thư viện kết nối trực tuyến (có thể do mất mạng). Hãy kiểm tra kết nối Internet rồi thử lại, hoặc chơi chế độ chung một máy.
     </p>
+    <p id="mode-select-notice" class="storage-warning hidden"></p>
   </div>
 
   <!-- ============ ONLINE LOBBY SCREEN (create / join) ============ -->
@@ -672,7 +677,7 @@
       <div id="online-feedback" class="feedback"></div>
       <div class="game-actions">
         <button id="online-submit-btn" class="btn btn-primary" type="button" disabled>Xác nhận</button>
-        <button id="online-quit-btn" class="btn btn-quit" type="button">🚩 Bỏ cuộc</button>
+        <button id="online-quit-btn" class="btn btn-quit" type="button">🚪 Rời phòng (bỏ cuộc)</button>
       </div>
     </div>
 
@@ -817,7 +822,10 @@ function showScreen(name){
   });
 }
 
-document.getElementById("pick-local-mode").addEventListener("click", ()=> showScreen("setup"));
+function clearModeSelectNotice(){
+  document.getElementById("mode-select-notice").classList.add("hidden");
+}
+document.getElementById("pick-local-mode").addEventListener("click", ()=>{ clearModeSelectNotice(); showScreen("setup"); });
 document.getElementById("setup-back-btn").addEventListener("click", ()=> showScreen("modeSelect"));
 
 document.getElementById("pick-online-mode").addEventListener("click", ()=>{
@@ -825,6 +833,7 @@ document.getElementById("pick-online-mode").addEventListener("click", ()=>{
     document.getElementById("storage-warning").classList.remove("hidden");
     return;
   }
+  clearModeSelectNotice();
   showScreen("onlineLobby");
 });
 document.getElementById("lobby-back-btn").addEventListener("click", ()=> showScreen("modeSelect"));
@@ -915,12 +924,24 @@ document.getElementById("create-room-btn").addEventListener("click", ()=>{
 function handleHostMessage(conn, msg){
   if(!room) return;
   if(msg.type === "join"){
-    if(room.status !== "lobby"){
-      conn.send({ type: "error", message: "Phòng đã bắt đầu chơi rồi." });
+    if(room.status === "ended"){
+      conn.send({ type: "error", message: "Ván chơi đã kết thúc." });
       return;
     }
-    if(!room.players.find(p=>p.clientId===conn.peer) && room.players.length < 10){
+    if(!room.players.find(p=>p.clientId===conn.peer)){
+      if(room.players.length >= 10){
+        conn.send({ type: "error", message: "Phòng đã đầy (tối đa 10 người)." });
+        return;
+      }
+      // vào giữa ván đang chơi -> tự động xếp vào cuối hàng chờ lượt
       room.players.push({ clientId: conn.peer, name: msg.name, color: msg.color, active: true });
+    }
+  } else if(msg.type === "update_info"){
+    if(room.status !== "lobby") return; // chỉ đổi tên/màu được khi còn ở phòng chờ
+    const p = room.players.find(pl=>pl.clientId===conn.peer);
+    if(p){
+      p.name = (msg.name || p.name).slice(0,20);
+      p.color = msg.color || p.color;
     }
   } else if(msg.type === "submit"){
     if(room.status !== "playing" || room.currentPlayerId !== conn.peer) return;
@@ -974,12 +995,13 @@ document.getElementById("join-room-btn").addEventListener("click", ()=>{
       } else if(msg.type === "error"){
         showLobbyFeedback(msg.message, "error");
       } else if(msg.type === "closed"){
-        showLobbyFeedback("Chủ phòng đã rời phòng, ván chơi kết thúc.", "error");
-        leaveOnlineRoom();
+        cleanupPeerResources(false);
+        goHomeWithNotice("Chủ phòng đã rời phòng, ván chơi kết thúc.");
       }
     });
     clientConn.on("close", ()=>{
-      showOnlineFeedback("Mất kết nối với chủ phòng.", "error");
+      cleanupPeerResources(false);
+      goHomeWithNotice("Mất kết nối với chủ phòng — ván chơi đã kết thúc.");
     });
   });
 
@@ -1007,6 +1029,21 @@ function showRoomFeedback(msg){
   el.textContent = msg;
   setTimeout(()=>{ el.textContent = original; }, 1800);
 }
+function escapeAttr(s){
+  return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;");
+}
+function updateMyInfo(name, color){
+  if(!room || room.status !== "lobby") return;
+  name = (name || "").trim().slice(0,20) || "Người chơi";
+  if(isHostOfRoom){
+    const p = room.players.find(pl=>pl.clientId===myClientId);
+    if(p){ p.name = name; p.color = color; }
+    broadcastState();
+    rerenderCurrentOnlineScreen();
+  } else if(clientConn && clientConn.open){
+    clientConn.send({ type: "update_info", name, color });
+  }
+}
 
 function rerenderCurrentOnlineScreen(){
   if(!room) return;
@@ -1021,12 +1058,34 @@ function renderRoomScreen(){
   const listEl = document.getElementById("room-player-list");
   listEl.innerHTML = "";
   room.players.forEach(p=>{
-    const chip = document.createElement("div");
-    chip.className = "player-chip";
-    chip.innerHTML = `<span class="dot" style="background:${p.color}"></span>${escapeHtml(p.name)}${p.clientId===room.hostId ? " 👑" : ""}`;
-    listEl.appendChild(chip);
+    if(p.clientId === myClientId){
+      // cho phép tự đổi tên/màu của mình trước khi chủ phòng bấm bắt đầu
+      const row = document.createElement("div");
+      row.className = "player-config-row";
+      row.style.width = "100%";
+      row.innerHTML = `
+        <input type="color" id="room-my-color" value="${p.color}">
+        <input type="text" id="room-my-name" value="${escapeAttr(p.name)}" maxlength="20">
+        <span class="player-badge-num">${p.clientId===room.hostId ? "👑" : "(bạn)"}</span>
+      `;
+      listEl.appendChild(row);
+    } else {
+      const chip = document.createElement("div");
+      chip.className = "player-chip";
+      chip.innerHTML = `<span class="dot" style="background:${p.color}"></span>${escapeHtml(p.name)}${p.clientId===room.hostId ? " 👑" : ""}`;
+      listEl.appendChild(chip);
+    }
   });
   document.getElementById("room-player-total").textContent = room.players.length;
+
+  const myColorInput = document.getElementById("room-my-color");
+  const myNameInput = document.getElementById("room-my-name");
+  if(myColorInput && myNameInput){
+    const commit = ()=> updateMyInfo(myNameInput.value, myColorInput.value);
+    myColorInput.addEventListener("change", commit);
+    myNameInput.addEventListener("change", commit);
+    myNameInput.addEventListener("keydown", e=>{ if(e.key==="Enter"){ myNameInput.blur(); } });
+  }
 
   const hostActions = document.getElementById("room-host-actions");
   const waitingHint = document.getElementById("room-waiting-hint");
@@ -1051,9 +1110,11 @@ document.getElementById("start-online-game-btn").addEventListener("click", ()=>{
 
 document.getElementById("leave-room-btn").addEventListener("click", leaveOnlineRoom);
 
-function leaveOnlineRoom(){
+function cleanupPeerResources(notifyOthers){
   if(isHostOfRoom){
-    Object.values(hostConns).forEach(conn=>{ try{ conn.send({ type: "closed" }); }catch(e){} });
+    if(notifyOthers){
+      Object.values(hostConns).forEach(conn=>{ try{ conn.send({ type: "closed" }); }catch(e){} });
+    }
     if(hostPeer) hostPeer.destroy();
     hostPeer = null; hostConns = {};
   } else {
@@ -1065,7 +1126,29 @@ function leaveOnlineRoom(){
   currentRoomCode = null;
   isHostOfRoom = false;
   myClientId = null;
+}
+function goHomeWithNotice(msg){
+  const el = document.getElementById("mode-select-notice");
+  if(msg){ el.textContent = msg; el.classList.remove("hidden"); }
+  else { el.classList.add("hidden"); el.textContent = ""; }
   showScreen("modeSelect");
+}
+function leaveOnlineRoom(){
+  // rời phòng chủ động: nếu đang ở giữa ván thì tự tính là bỏ cuộc trước khi rời
+  if(room && room.status === "playing"){
+    const p = room.players.find(pl=>pl.clientId===myClientId);
+    if(p && p.active){
+      p.active = false;
+      advanceIfNeeded(room);
+      if(isHostOfRoom) broadcastState();
+      else if(clientConn && clientConn.open){ try{ clientConn.send({ type: "quit" }); }catch(e){} }
+    }
+  }
+  // nếu ván vừa tự kết thúc hợp lệ (đủ người thắng) thì không cần ép mọi người về trang chủ,
+  // họ sẽ tự thấy màn hình người thắng qua trạng thái vừa gửi ở trên
+  const alreadyEnded = room && room.status === "ended";
+  cleanupPeerResources(!alreadyEnded);
+  goHomeWithNotice(null);
 }
 
 /* ---------- Vòng chơi online ---------- */
@@ -1187,24 +1270,12 @@ function submitStreetOnline(){
   input.value = "";
 }
 
-function quitOnline(){
-  if(!room || room.status !== "playing") return;
-  if(isHostOfRoom){
-    const p = room.players.find(pl=>pl.clientId===myClientId);
-    if(p) p.active = false;
-    advanceIfNeeded(room);
-    broadcastState();
-    rerenderCurrentOnlineScreen();
-  } else {
-    clientConn.send({ type: "quit" });
-  }
-}
-
 document.getElementById("online-submit-btn").addEventListener("click", submitStreetOnline);
 document.getElementById("online-street-input").addEventListener("keydown", e=>{
   if(e.key === "Enter"){ e.preventDefault(); submitStreetOnline(); }
 });
-document.getElementById("online-quit-btn").addEventListener("click", quitOnline);
+// nút "Rời phòng" giữa ván: tự động tính là bỏ cuộc rồi rời phòng luôn (xem leaveOnlineRoom)
+document.getElementById("online-quit-btn").addEventListener("click", leaveOnlineRoom);
 document.getElementById("online-home-btn").addEventListener("click", leaveOnlineRoom);
 
 /* ---------- Nhận diện giọng nói cho ô nhập online ---------- */
