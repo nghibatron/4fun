@@ -385,6 +385,25 @@
     opacity:0.45;
     text-decoration:line-through;
   }
+  .kick-btn{
+    margin-left:2px;
+    width:18px;height:18px;
+    border-radius:50%;
+    border:none;
+    background:var(--paper-dark);
+    color:var(--red);
+    font-size:11px;
+    line-height:1;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    transition:background .15s, color .15s;
+  }
+  .kick-btn:hover{
+    background:var(--red);
+    color:var(--white);
+  }
 
   .turn-banner{
     text-align:center;
@@ -408,6 +427,42 @@
     font-size:24px;
     font-weight:700;
     text-transform:uppercase;
+  }
+  .timer-display{
+    margin-top:8px;
+    display:inline-block;
+    font-family:'Oswald',sans-serif;
+    font-size:18px;
+    font-weight:700;
+    padding:4px 14px;
+    border-radius:999px;
+    background:rgba(255,255,255,0.18);
+    letter-spacing:0.05em;
+    transition:background .2s, color .2s;
+  }
+  .timer-display.urgent{
+    background:var(--red);
+    color:var(--white);
+    animation:timer-pulse .6s infinite;
+  }
+  @keyframes timer-pulse{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.08);}
+  }
+
+  .toggle-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:14px;
+    color:var(--ink);
+    cursor:pointer;
+    margin-bottom:14px;
+  }
+  .toggle-row input[type="checkbox"]{
+    width:18px;height:18px;
+    accent-color:var(--plate-blue);
+    cursor:pointer;
   }
 
   .input-row{
@@ -538,6 +593,24 @@
     box-shadow:var(--shadow);
     margin-bottom:20px;
     border:3px solid var(--plate-blue);
+    position:relative;
+    overflow:hidden;
+    animation:winner-pop .55s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes winner-pop{
+    0%{ transform:scale(0.6) rotate(-4deg); opacity:0; }
+    60%{ transform:scale(1.06) rotate(1deg); opacity:1; }
+    100%{ transform:scale(1) rotate(0deg); }
+  }
+  .winner-plate .trophy{
+    font-size:38px;
+    display:inline-block;
+    animation:trophy-bounce 1.1s ease-in-out infinite;
+    margin-bottom:6px;
+  }
+  @keyframes trophy-bounce{
+    0%,100%{ transform:translateY(0) rotate(-6deg); }
+    50%{ transform:translateY(-8px) rotate(6deg); }
   }
   .winner-plate .lbl{
     font-family:'Oswald',sans-serif;
@@ -566,6 +639,29 @@
     margin-top:10px;
     font-size:14px;
     color:var(--plate-blue-dark);
+  }
+
+  /* ---------- Confetti ---------- */
+  .confetti-layer{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:9999;
+  }
+  .confetti-piece{
+    position:absolute;
+    top:-24px;
+    width:8px;
+    height:14px;
+    opacity:0.95;
+    animation-name:confetti-fall;
+    animation-timing-function:cubic-bezier(.4,0,.6,1);
+    animation-fill-mode:forwards;
+  }
+  @keyframes confetti-fall{
+    0%{ transform:translateY(0) rotate(0deg); opacity:1; }
+    100%{ transform:translateY(105vh) rotate(600deg); opacity:0; }
   }
 
   footer.note{
@@ -627,6 +723,18 @@
         <div class="lobby-half">
           <h2 class="section-title">Tạo phòng mới</h2>
           <p class="hint">Bạn sẽ là chủ phòng, nhận mã phòng để gửi cho bạn bè.</p>
+          <label class="toggle-row">
+            <input type="checkbox" id="enable-timer-online">
+            <span>Giới hạn thời gian trả lời mỗi lượt</span>
+          </label>
+          <div class="player-count-row" id="timer-seconds-row-online" style="display:none;">
+            <div class="stepper">
+              <button id="dec-timer-online" type="button" aria-label="Giảm số giây">−</button>
+              <span id="timer-seconds-display-online">30</span>
+              <button id="inc-timer-online" type="button" aria-label="Tăng số giây">+</button>
+            </div>
+            <span class="hint">giây/lượt</span>
+          </div>
           <button id="create-room-btn" class="btn btn-primary" type="button">Tạo phòng</button>
         </div>
         <div class="lobby-divider"><span>hoặc</span></div>
@@ -667,6 +775,7 @@
     <div id="online-turn-banner" class="turn-banner">
       <div class="lbl" id="online-turn-label">Đến lượt</div>
       <div class="name" id="online-turn-player-name">—</div>
+      <div class="timer-display hidden" id="timer-display-online">30s</div>
     </div>
 
     <div class="card">
@@ -690,6 +799,7 @@
   <!-- ============ ONLINE END SCREEN ============ -->
   <div id="online-end-screen" class="hidden">
     <div class="winner-plate">
+      <div class="trophy">🏆</div>
       <div class="lbl">Người chiến thắng</div>
       <div class="wname"><span class="dot" id="online-winner-dot"></span><span id="online-winner-name">—</span></div>
       <div class="stat" id="online-winner-stat"></div>
@@ -714,6 +824,20 @@
       <h2 class="section-title">Người chơi &amp; màu đại diện</h2>
       <div id="player-config-list" class="player-config-list"></div>
 
+      <h2 class="section-title">Giới hạn thời gian trả lời</h2>
+      <label class="toggle-row">
+        <input type="checkbox" id="enable-timer-local">
+        <span>Bật đếm giờ mỗi lượt — hết giờ tự bị loại (bỏ cuộc)</span>
+      </label>
+      <div class="player-count-row" id="timer-seconds-row-local" style="display:none;">
+        <div class="stepper">
+          <button id="dec-timer-local" type="button" aria-label="Giảm số giây">−</button>
+          <span id="timer-seconds-display-local">30</span>
+          <button id="inc-timer-local" type="button" aria-label="Tăng số giây">+</button>
+        </div>
+        <span class="hint">giây mỗi lượt (10–120 giây).</span>
+      </div>
+
       <div class="setup-actions">
         <button id="start-game-btn" class="btn btn-primary" type="button">Bắt đầu chơi</button>
       </div>
@@ -727,6 +851,7 @@
     <div id="turn-banner" class="turn-banner">
       <div class="lbl">Đến lượt</div>
       <div class="name" id="turn-player-name">—</div>
+      <div class="timer-display hidden" id="timer-display-local">30s</div>
     </div>
 
     <div class="card">
@@ -750,6 +875,7 @@
   <!-- ============ END SCREEN ============ -->
   <div id="end-screen">
     <div class="winner-plate">
+      <div class="trophy">🏆</div>
       <div class="lbl">Người chiến thắng</div>
       <div class="wname"><span class="dot" id="winner-dot"></span><span id="winner-name">—</span></div>
       <div class="stat" id="winner-stat"></div>
@@ -759,7 +885,7 @@
 
   <footer class="note">
     Dữ liệu tên đường tổng hợp cho TPHCM (bao gồm các quận/huyện sáp nhập trước đây), chỉ dùng để tham khảo cho trò chơi — có thể chưa đầy đủ 100% hoặc còn sai sót.<br>
-    Chế độ online dùng WebRTC qua PeerJS. Kết nối sẽ ưu tiên P2P trực tiếp và tự dùng TURN relay khi hai mạng không thể kết nối trực tiếp — vì vậy người chơi có thể ở các Wi-Fi/4G/5G khác nhau.<br>
+    Chế độ online dùng kết nối trực tiếp giữa các trình duyệt (WebRTC qua thư viện PeerJS, miễn phí, không cần tài khoản) — dữ liệu ván chơi không đi qua máy chủ của Claude/Anthropic. File có thể tải xuống và mở trực tiếp trên bất kỳ trình duyệt nào, chỉ cần có Internet.<br>
     Nhận diện giọng nói (nếu trình duyệt hỗ trợ) dùng để nhập nhanh tên đường bằng tiếng Việt.
   </footer>
 </div>
@@ -874,54 +1000,13 @@ function showLobbyFeedback(msg, type){
   el.className = "feedback" + (type ? " " + type : "");
 }
 
-/*
- * WebRTC ICE configuration.
- *
- * Trước đây PeerJS chỉ dùng STUN mặc định. Cách này thường hoạt động khi
- * hai thiết bị ở cùng Wi-Fi, nhưng có thể thất bại khi hai người ở các
- * mạng khác nhau (NAT đối xứng / firewall / mạng di động).
- *
- * TURN là relay dự phòng: nếu kết nối P2P trực tiếp không đi được, WebRTC
- * sẽ chuyển dữ liệu qua TURN. Open Relay cung cấp endpoint miễn phí cho
- * mục đích thử nghiệm / quy mô nhỏ. Khi triển khai đông người, nên thay
- * bằng TURN riêng hoặc TURN có credential riêng của bạn.
- */
-const ONLINE_ICE_CONFIG = {
-  iceServers: [
-    { urls: "stun:stun.l.google.com:19302" },
-    {
-      urls: "turn:openrelay.metered.ca:80",
-      username: "openrelayproject",
-      credential: "openrelayproject"
-    },
-    {
-      urls: "turn:openrelay.metered.ca:443",
-      username: "openrelayproject",
-      credential: "openrelayproject"
-    },
-    {
-      urls: "turn:openrelay.metered.ca:443?transport=tcp",
-      username: "openrelayproject",
-      credential: "openrelayproject"
-    }
-  ],
-  iceTransportPolicy: "all",
-  sdpSemantics: "unified-plan"
-};
-
-function createOnlinePeer(id){
-  return id
-    ? new Peer(id, { config: ONLINE_ICE_CONFIG, debug: 1 })
-    : new Peer({ config: ONLINE_ICE_CONFIG, debug: 1 });
-}
-
 /* ---------- Tạo phòng (trở thành chủ phòng / máy chủ P2P) ---------- */
 document.getElementById("create-room-btn").addEventListener("click", ()=>{
   const info = myOnlineInfo();
   const code = genRoomCode();
   showLobbyFeedback("Đang tạo phòng…", "");
 
-  hostPeer = createOnlinePeer(roomPeerId(code));
+  hostPeer = new Peer(roomPeerId(code));
 
   hostPeer.on("open", (id)=>{
     myClientId = id;
@@ -930,6 +1015,8 @@ document.getElementById("create-room-btn").addEventListener("click", ()=>{
     room = {
       status: "lobby",
       hostId: myClientId,
+      timeLimitSeconds: timerEnabledOnline ? timerSecondsOnline : null,
+      turnStartedAt: null,
       players: [{ clientId: myClientId, name: info.name, color: info.color, active: true }],
       currentPlayerId: null,
       usedStreets: [],
@@ -994,16 +1081,85 @@ function handleHostMessage(conn, msg){
     room.usedStreets.unshift({ name: canonical, playerId: conn.peer, color: p.color });
     room.currentPlayerId = nextPlayerId(room, conn.peer);
     advanceIfNeeded(room);
+    touchTurnStart(room);
   } else if(msg.type === "quit"){
     const p = room.players.find(pl=>pl.clientId===conn.peer);
     if(p) p.active = false;
     advanceIfNeeded(room);
+    touchTurnStart(room);
   } else {
     return;
   }
   broadcastState();
   rerenderCurrentOnlineScreen();
 }
+
+function touchTurnStart(room){
+  if(room.status === "playing") room.turnStartedAt = Date.now();
+}
+
+/* ---------- Chủ phòng loại (kick) người chơi ---------- */
+function kickPlayer(clientId){
+  if(!isHostOfRoom || !room) return;
+  const target = room.players.find(p=>p.clientId===clientId);
+  if(!target) return;
+  const conn = hostConns[clientId];
+  if(conn && conn.open){ try{ conn.send({ type: "kicked" }); }catch(e){} }
+  if(room.status === "lobby"){
+    room.players = room.players.filter(p=>p.clientId !== clientId);
+  } else {
+    target.active = false;
+    advanceIfNeeded(room);
+    touchTurnStart(room);
+  }
+  broadcastState();
+  rerenderCurrentOnlineScreen();
+  if(conn){ setTimeout(()=>{ try{ conn.close(); }catch(e){} }, 300); }
+}
+
+/* ---------- Đếm giờ trả lời (chơi online) ---------- */
+let timerEnabledOnline = false;
+let timerSecondsOnline = 30;
+document.getElementById("enable-timer-online").addEventListener("change", (e)=>{
+  timerEnabledOnline = e.target.checked;
+  document.getElementById("timer-seconds-row-online").style.display = timerEnabledOnline ? "flex" : "none";
+});
+document.getElementById("dec-timer-online").addEventListener("click", ()=>{
+  timerSecondsOnline = Math.max(10, timerSecondsOnline - 5);
+  document.getElementById("timer-seconds-display-online").textContent = timerSecondsOnline;
+});
+document.getElementById("inc-timer-online").addEventListener("click", ()=>{
+  timerSecondsOnline = Math.min(120, timerSecondsOnline + 5);
+  document.getElementById("timer-seconds-display-online").textContent = timerSecondsOnline;
+});
+
+// Host: kiểm tra định kỳ xem lượt hiện tại đã hết giờ chưa
+setInterval(()=>{
+  if(!isHostOfRoom || !room || room.status !== "playing" || !room.timeLimitSeconds || !room.turnStartedAt) return;
+  const elapsed = Date.now() - room.turnStartedAt;
+  if(elapsed >= room.timeLimitSeconds * 1000){
+    const p = room.players.find(pl=>pl.clientId===room.currentPlayerId);
+    if(p) p.active = false;
+    advanceIfNeeded(room);
+    touchTurnStart(room);
+    broadcastState();
+    rerenderCurrentOnlineScreen();
+  }
+}, 500);
+
+// Mọi người: hiển thị đồng hồ đếm ngược trực quan (chỉ để xem, host mới có quyền xử lý hết giờ)
+setInterval(()=>{
+  const el = document.getElementById("timer-display-online");
+  if(!el) return;
+  if(!room || room.status !== "playing" || !room.timeLimitSeconds || !room.turnStartedAt){
+    el.classList.add("hidden");
+    return;
+  }
+  el.classList.remove("hidden");
+  const remaining = Math.max(0, Math.ceil((room.turnStartedAt + room.timeLimitSeconds * 1000 - Date.now()) / 1000));
+  el.textContent = remaining + "s";
+  el.classList.toggle("urgent", remaining <= 5);
+}, 250);
 
 function broadcastState(){
   Object.values(hostConns).forEach(conn=>{
@@ -1018,31 +1174,31 @@ document.getElementById("join-room-btn").addEventListener("click", ()=>{
   const info = myOnlineInfo();
   showLobbyFeedback("Đang kết nối tới phòng…", "");
 
-  clientPeer = createOnlinePeer();
+  clientPeer = new Peer();
 
   clientPeer.on("open", (id)=>{
     myClientId = id;
     isHostOfRoom = false;
     currentRoomCode = code;
-    clientConn = clientPeer.connect(roomPeerId(code), { reliable: true, serialization: "json" });
+    onlineEndAnimated = false;
+    clientConn = clientPeer.connect(roomPeerId(code), { reliable: true });
 
     clientConn.on("open", ()=>{
-      showLobbyFeedback("Đã kết nối tới phòng — đang vào phòng…", "ok");
       clientConn.send({ type: "join", name: info.name, color: info.color });
-    });
-    clientConn.on("error", (err)=>{
-      console.warn("PeerJS DataConnection error:", err);
-      showLobbyFeedback("Kết nối P2P thất bại. Hãy thử lại hoặc đổi mạng (Wi-Fi ↔ 4G/5G).", "error");
     });
     clientConn.on("data", (msg)=>{
       if(msg.type === "state"){
         room = msg.room;
+        showRoomCodeUI();
         rerenderCurrentOnlineScreen();
       } else if(msg.type === "error"){
         showLobbyFeedback(msg.message, "error");
       } else if(msg.type === "closed"){
         cleanupPeerResources(false);
         goHomeWithNotice("Chủ phòng đã rời phòng, ván chơi kết thúc.");
+      } else if(msg.type === "kicked"){
+        cleanupPeerResources(false);
+        goHomeWithNotice("Bạn đã bị chủ phòng loại khỏi phòng.");
       }
     });
     clientConn.on("close", ()=>{
@@ -1061,13 +1217,17 @@ document.getElementById("join-room-btn").addEventListener("click", ()=>{
 });
 
 function enterRoomScreen(){
+  onlineEndAnimated = false;
   showScreen("onlineRoom");
+  showRoomCodeUI();
+  rerenderCurrentOnlineScreen();
+}
+function showRoomCodeUI(){
   document.getElementById("room-code-display").textContent = currentRoomCode;
   document.getElementById("copy-room-code-btn").onclick = ()=>{
     if(navigator.clipboard){ navigator.clipboard.writeText(currentRoomCode).catch(()=>{}); }
     showRoomFeedback("Đã sao chép mã phòng!");
   };
-  rerenderCurrentOnlineScreen();
 }
 function showRoomFeedback(msg){
   const el = document.getElementById("room-waiting-hint");
@@ -1118,11 +1278,19 @@ function renderRoomScreen(){
     } else {
       const chip = document.createElement("div");
       chip.className = "player-chip";
-      chip.innerHTML = `<span class="dot" style="background:${p.color}"></span>${escapeHtml(p.name)}${p.clientId===room.hostId ? " 👑" : ""}`;
+      const kickBtn = isHostOfRoom
+        ? `<button class="kick-btn" type="button" data-kick="${escapeAttr(p.clientId)}" title="Loại khỏi phòng">✕</button>`
+        : "";
+      chip.innerHTML = `<span class="dot" style="background:${p.color}"></span>${escapeHtml(p.name)}${p.clientId===room.hostId ? " 👑" : ""}${kickBtn}`;
       listEl.appendChild(chip);
     }
   });
   document.getElementById("room-player-total").textContent = room.players.length;
+  if(isHostOfRoom){
+    listEl.querySelectorAll("[data-kick]").forEach(btn=>{
+      btn.addEventListener("click", ()=> kickPlayer(btn.dataset.kick));
+    });
+  }
 
   const myColorInput = document.getElementById("room-my-color");
   const myNameInput = document.getElementById("room-my-name");
@@ -1150,6 +1318,7 @@ document.getElementById("start-online-game-btn").addEventListener("click", ()=>{
   if(!isHostOfRoom || !room || room.players.length < 2) return;
   room.status = "playing";
   room.currentPlayerId = room.players[0].clientId;
+  touchTurnStart(room);
   broadcastState();
   rerenderCurrentOnlineScreen();
 });
@@ -1231,9 +1400,17 @@ function renderOnlineGame(room){
   room.players.forEach(p=>{
     const chip = document.createElement("div");
     chip.className = "player-chip" + (!p.active ? " out" : "") + (p.active && p.clientId===room.currentPlayerId ? " current" : "");
-    chip.innerHTML = `<span class="dot" style="background:${p.color}"></span>${escapeHtml(p.name)}${p.clientId===myClientId ? " (bạn)" : ""}`;
+    const kickBtn = (isHostOfRoom && p.clientId !== myClientId && p.active)
+      ? `<button class="kick-btn" type="button" data-kick="${escapeAttr(p.clientId)}" title="Loại khỏi phòng">✕</button>`
+      : "";
+    chip.innerHTML = `<span class="dot" style="background:${p.color}"></span>${escapeHtml(p.name)}${p.clientId===myClientId ? " (bạn)" : ""}${kickBtn}`;
     scoreboardEl.appendChild(chip);
   });
+  if(isHostOfRoom){
+    scoreboardEl.querySelectorAll("[data-kick]").forEach(btn=>{
+      btn.addEventListener("click", ()=> kickPlayer(btn.dataset.kick));
+    });
+  }
 
   const turnPlayer = room.players.find(p=>p.clientId===room.currentPlayerId) || room.players[0];
   const banner = document.getElementById("online-turn-banner");
@@ -1260,7 +1437,9 @@ function renderOnlineGame(room){
   document.getElementById("online-street-total").textContent = room.usedStreets.length;
 }
 
+let onlineEndAnimated = false;
 function renderOnlineEnd(room){
+  if(!onlineEndAnimated){ onlineEndAnimated = true; launchConfetti(); }
   const winner = room.players.find(p=>p.clientId===room.winnerId);
   if(winner){
     document.getElementById("online-winner-dot").style.background = winner.color;
@@ -1343,25 +1522,6 @@ document.getElementById("online-home-btn").addEventListener("click", leaveOnline
   recognition.addEventListener("end", ()=>{ listening = false; micBtn.classList.remove("listening"); });
   recognition.addEventListener("error", ()=>{ listening = false; micBtn.classList.remove("listening"); });
 })();
-/* ---------- Nhận diện giọng nói cho ô nhập online ---------- */
-(function setupOnlineMic(){
-  const micBtn = document.getElementById("online-mic-btn");
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){ micBtn.style.display = "none"; return; }
-  const recognition = new SR();
-  recognition.lang = "vi-VN";
-  recognition.interimResults = false;
-  let listening = false;
-  micBtn.addEventListener("click", ()=>{
-    if(listening) return;
-    try{ recognition.start(); listening = true; micBtn.classList.add("listening"); }catch(e){}
-  });
-  recognition.addEventListener("result", (e)=>{
-    document.getElementById("online-street-input").value = e.results[0][0].transcript;
-  });
-  recognition.addEventListener("end", ()=>{ listening = false; micBtn.classList.remove("listening"); });
-  recognition.addEventListener("error", ()=>{ listening = false; micBtn.classList.remove("listening"); });
-})();
 
 /* ======================= SETUP SCREEN (CHƠI CHUNG MỘT MÁY) ======================= */
 const playerCountDisplay = document.getElementById("player-count-display");
@@ -1389,6 +1549,20 @@ document.getElementById("dec-player").addEventListener("click", ()=>{
 });
 document.getElementById("inc-player").addEventListener("click", ()=>{
   if(playerCount < 10){ playerCount++; playerCountDisplay.textContent = playerCount; renderPlayerConfig(); }
+});
+
+/* ---------- Cấu hình giới hạn thời gian (chơi chung một máy) ---------- */
+document.getElementById("enable-timer-local").addEventListener("change", (e)=>{
+  timerEnabledLocal = e.target.checked;
+  document.getElementById("timer-seconds-row-local").style.display = timerEnabledLocal ? "flex" : "none";
+});
+document.getElementById("dec-timer-local").addEventListener("click", ()=>{
+  timerSecondsLocal = Math.max(10, timerSecondsLocal - 5);
+  document.getElementById("timer-seconds-display-local").textContent = timerSecondsLocal;
+});
+document.getElementById("inc-timer-local").addEventListener("click", ()=>{
+  timerSecondsLocal = Math.min(120, timerSecondsLocal + 5);
+  document.getElementById("timer-seconds-display-local").textContent = timerSecondsLocal;
 });
 
 document.getElementById("start-game-btn").addEventListener("click", ()=>{
@@ -1436,6 +1610,7 @@ function renderTurnBanner(){
   turnPlayerNameEl.textContent = p.name;
   streetInput.style.borderColor = p.color;
   streetInput.style.background = p.color;
+  startLocalTurnTimer();
 }
 
 function renderStreetLog(){
@@ -1459,6 +1634,25 @@ function shade(hex, percent){
   let R = f>>16, G = (f>>8)&0x00FF, B = f&0x0000FF;
   const nr = Math.round((t-R)*p)+R, ng = Math.round((t-G)*p)+G, nb = Math.round((t-B)*p)+B;
   return "#" + (0x1000000 + nr*0x10000 + ng*0x100 + nb).toString(16).slice(1);
+}
+function launchConfetti(){
+  const layer = document.createElement("div");
+  layer.className = "confetti-layer";
+  document.body.appendChild(layer);
+  const colors = ["#c99a3c","#e7bd63","#123a63","#a5333c","#2b7a4b","#ffffff"];
+  const n = 70;
+  for(let i=0;i<n;i++){
+    const piece = document.createElement("div");
+    piece.className = "confetti-piece";
+    piece.style.left = (Math.random()*100) + "vw";
+    piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+    piece.style.animationDuration = (2.2 + Math.random()*1.6) + "s";
+    piece.style.animationDelay = (Math.random()*0.5) + "s";
+    piece.style.transform = `rotate(${Math.random()*360}deg)`;
+    if(Math.random() < 0.4) piece.style.borderRadius = "50%";
+    layer.appendChild(piece);
+  }
+  setTimeout(()=>{ layer.remove(); }, 4200);
 }
 
 function nextActiveIndex(fromIdx){
@@ -1516,7 +1710,7 @@ function submitStreet(){
   streetInput.focus();
 }
 
-function quitCurrentPlayer(){
+function quitCurrentPlayer(reason){
   const player = players[currentIdx];
   player.active = false;
 
@@ -1527,13 +1721,44 @@ function quitCurrentPlayer(){
   currentIdx = nextActiveIndex(currentIdx);
   renderScoreboard();
   renderTurnBanner();
-  showFeedback(`${player.name} đã bỏ cuộc.`, "error");
+  showFeedback(reason === "timeout" ? `⏰ Hết giờ! ${player.name} bị loại vì không trả lời kịp.` : `${player.name} đã bỏ cuộc.`, "error");
   streetInput.value = "";
   streetInput.focus();
 }
 
+/* ---------- Giới hạn thời gian trả lời (chơi chung một máy) ---------- */
+let timerEnabledLocal = false;
+let timerSecondsLocal = 30;
+let localTurnTimer = null;
+let localTurnDeadline = null;
+
+function startLocalTurnTimer(){
+  clearLocalTurnTimer();
+  const el = document.getElementById("timer-display-local");
+  if(!timerEnabledLocal){ el.classList.add("hidden"); return; }
+  el.classList.remove("hidden");
+  localTurnDeadline = Date.now() + timerSecondsLocal * 1000;
+  updateLocalTimerDisplay();
+  localTurnTimer = setInterval(updateLocalTimerDisplay, 250);
+}
+function updateLocalTimerDisplay(){
+  const el = document.getElementById("timer-display-local");
+  const remaining = Math.max(0, Math.ceil((localTurnDeadline - Date.now()) / 1000));
+  el.textContent = remaining + "s";
+  el.classList.toggle("urgent", remaining <= 5);
+  if(remaining <= 0){
+    clearLocalTurnTimer();
+    quitCurrentPlayer("timeout");
+  }
+}
+function clearLocalTurnTimer(){
+  if(localTurnTimer){ clearInterval(localTurnTimer); localTurnTimer = null; }
+}
+
 function endGame(){
+  clearLocalTurnTimer();
   showScreen("end");
+  launchConfetti();
   const winner = activePlayers()[0];
   if(winner){
     document.getElementById("winner-dot").style.background = winner.color;
