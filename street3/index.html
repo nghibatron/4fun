@@ -1003,22 +1003,10 @@ function showLobbyFeedback(msg, type){
   el.className = "feedback" + (type ? " " + type : "");
 }
 
-async function apiGet(params){
+async function apiCall(action, params){
   const apiUrl = getApiUrl();
-  const qs = new URLSearchParams(params).toString();
+  const qs = new URLSearchParams({ action, ...params }).toString();
   const res = await fetch(apiUrl + "?" + qs, { method: "GET" });
-  return res.json();
-}
-async function apiPost(action, data){
-  const apiUrl = getApiUrl();
-  const res = await fetch(apiUrl, {
-    method: "POST",
-    // Cố tình dùng text/plain để trình duyệt không gửi preflight OPTIONS
-    // (Apps Script Web App không xử lý OPTIONS) — Apps Script vẫn đọc
-    // được nội dung JSON qua e.postData.contents phía server.
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ action, ...data }),
-  });
   return res.json();
 }
 
@@ -1030,7 +1018,7 @@ document.getElementById("create-room-btn").addEventListener("click", async ()=>{
   myClientId = genClientId();
   showLobbyFeedback("Đang tạo phòng…", "");
   try{
-    const res = await apiPost("create", { name: info.name, color: info.color, clientId: myClientId });
+    const res = await apiCall("create", { name: info.name, color: info.color, clientId: myClientId });
     if(!res.ok){ showLobbyFeedback(res.error || "Không tạo được phòng.", "error"); return; }
     currentRoomCode = res.code;
     isHostOfRoom = true;
@@ -1052,7 +1040,7 @@ document.getElementById("join-room-btn").addEventListener("click", async ()=>{
   myClientId = genClientId();
   showLobbyFeedback("Đang kết nối tới phòng…", "");
   try{
-    const res = await apiPost("join", { code, name: info.name, color: info.color, clientId: myClientId });
+    const res = await apiCall("join", { code, name: info.name, color: info.color, clientId: myClientId });
     if(!res.ok){ showLobbyFeedback(res.error || "Không vào được phòng.", "error"); return; }
     currentRoomCode = code;
     room = res.room;
@@ -1077,7 +1065,7 @@ async function pollState(){
   if(!currentRoomCode || isPolling) return;
   isPolling = true;
   try{
-    const res = await apiGet({ action: "state", code: currentRoomCode });
+    const res = await apiCall("state", { code: currentRoomCode });
     if(!res.ok){
       stopPolling();
       const wasEnded = room && room.status === "ended";
@@ -1131,7 +1119,7 @@ async function updateMyInfo(name, color){
   if(!room || room.status !== "lobby") return;
   name = (name || "").trim().slice(0,20) || "Người chơi";
   try{
-    const res = await apiPost("update_info", { code: currentRoomCode, clientId: myClientId, name, color });
+    const res = await apiCall("update_info", { code: currentRoomCode, clientId: myClientId, name, color });
     if(res.ok){ room = res.room; rerenderCurrentOnlineScreen(); }
   }catch(err){ /* bỏ qua, sẽ đồng bộ lại ở lần poll kế tiếp */ }
 }
@@ -1213,7 +1201,7 @@ function renderRoomScreen(){
 document.getElementById("start-online-game-btn").addEventListener("click", async ()=>{
   if(!isHostOfRoom || !room || room.players.length < 2) return;
   try{
-    const res = await apiPost("start", { code: currentRoomCode, clientId: myClientId });
+    const res = await apiCall("start", { code: currentRoomCode, clientId: myClientId });
     if(res.ok){ room = res.room; rerenderCurrentOnlineScreen(); }
     else showRoomFeedback(res.error || "Không bắt đầu được.");
   }catch(err){ showRoomFeedback("Lỗi kết nối, thử lại."); }
@@ -1222,7 +1210,7 @@ document.getElementById("start-online-game-btn").addEventListener("click", async
 async function kickPlayer(targetClientId){
   if(!isHostOfRoom || !room) return;
   try{
-    const res = await apiPost("kick", { code: currentRoomCode, clientId: myClientId, target: targetClientId });
+    const res = await apiCall("kick", { code: currentRoomCode, clientId: myClientId, target: targetClientId });
     if(res.ok){ room = res.room; rerenderCurrentOnlineScreen(); }
   }catch(err){ /* sẽ đồng bộ lại ở lần poll kế tiếp */ }
 }
@@ -1243,7 +1231,7 @@ async function leaveOnlineRoom(){
   const wasEnded = room && room.status === "ended";
   currentRoomCode = null; room = null; isHostOfRoom = false; myClientId = null;
   if(codeToLeave && idToLeave){
-    try{ await apiPost("quit", { code: codeToLeave, clientId: idToLeave }); }catch(err){ /* bỏ qua */ }
+    try{ await apiCall("quit", { code: codeToLeave, clientId: idToLeave }); }catch(err){ /* bỏ qua */ }
   }
   if(!wasEnded) goHomeWithNotice(null);
   else showScreen("modeSelect");
@@ -1335,7 +1323,7 @@ async function submitStreetOnline(){
   input.value = "";
   showOnlineFeedback(`Đang gửi "${raw}"…`, "");
   try{
-    const res = await apiPost("submit", { code: currentRoomCode, clientId: myClientId, streetRaw: raw });
+    const res = await apiCall("submit", { code: currentRoomCode, clientId: myClientId, streetRaw: raw });
     if(!res.ok){
       showOnlineFeedback(res.error || "Có lỗi khi gửi, thử lại nhé.", "error");
       return;
