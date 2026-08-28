@@ -676,9 +676,75 @@
     .input-row{flex-direction:column;}
     .mic-btn{width:100%;height:46px;}
   }
+  #sound-toggle-btn{
+    position:fixed;
+    top:12px;
+    right:12px;
+    z-index:50;
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    border:2px solid var(--plate-blue);
+    background:#fff;
+    font-size:18px;
+    cursor:pointer;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);
+  }
+  #sound-toggle-btn.muted{ opacity:0.55; }
+
+  .emoji-input{
+    width:52px !important;
+    flex:0 0 52px;
+    text-align:center;
+    font-size:18px;
+    padding:8px 4px !important;
+    border-radius:6px;
+    border:2px solid var(--plate-blue);
+  }
+  .emoji-quickpick{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin:6px 0 12px;
+  }
+  .emoji-pick-btn{
+    font-size:18px;
+    line-height:1;
+    padding:6px 8px;
+    border-radius:8px;
+    border:1px solid #d8cfb8;
+    background:#fff;
+    cursor:pointer;
+  }
+  .emoji-pick-btn:hover{ background:#f3ead3; }
+  .emoji-pick-btn.clear-btn{ font-size:13px; color:#a5333c; }
+
+  .room-code-mini{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    justify-content:center;
+    font-size:14px;
+    color:#6b6252;
+    margin-bottom:10px;
+  }
+  .room-code-mini b{
+    font-size:16px;
+    letter-spacing:2px;
+    color:var(--plate-blue);
+  }
+  .room-code-mini button{
+    border:1px solid #d8cfb8;
+    background:#fff;
+    border-radius:6px;
+    padding:2px 8px;
+    cursor:pointer;
+    font-size:13px;
+  }
 </style>
 </head>
 <body>
+<button id="sound-toggle-btn" type="button" title="Bật/tắt âm thanh" aria-label="Bật/tắt âm thanh">🔊</button>
 <div class="wrap">
 
   <div class="title-plate">
@@ -720,9 +786,25 @@
       </div>
 
       <h2 class="section-title">Thông tin của bạn</h2>
+      <div class="emoji-quickpick">
+        <button type="button" class="emoji-pick-btn" data-emoji="😀">😀</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="😎">😎</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🤠">🤠</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🐱">🐱</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🐶">🐶</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🦊">🦊</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🐸">🐸</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🍀">🍀</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="⭐">⭐</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🔥">🔥</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="👑">👑</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🎯">🎯</button>
+        <button type="button" class="emoji-pick-btn clear-btn" data-emoji="">Xoá</button>
+      </div>
       <div class="player-config-list">
         <div class="player-config-row">
           <input type="color" id="online-my-color" value="#c0392b">
+          <input type="text" id="online-my-emoji" class="emoji-input" placeholder="🙂" maxlength="4">
           <input type="text" id="online-my-name" placeholder="Tên của bạn" maxlength="20">
         </div>
       </div>
@@ -753,6 +835,21 @@
     </div>
     <div class="card">
       <h2 class="section-title">Người chơi trong phòng <span class="street-count">(<b id="room-player-total">0</b>)</span></h2>
+      <div class="emoji-quickpick">
+        <button type="button" class="emoji-pick-btn" data-emoji="😀">😀</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="😎">😎</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🤠">🤠</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🐱">🐱</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🐶">🐶</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🦊">🦊</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🐸">🐸</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🍀">🍀</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="⭐">⭐</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🔥">🔥</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="👑">👑</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🎯">🎯</button>
+        <button type="button" class="emoji-pick-btn clear-btn" data-emoji="">Xoá</button>
+      </div>
       <div id="room-player-list" class="scoreboard"></div>
       <div id="room-host-actions" class="setup-actions hidden" style="margin-top:16px;">
         <button id="start-online-game-btn" class="btn btn-primary" type="button">Bắt đầu chơi</button>
@@ -766,6 +863,10 @@
 
   <!-- ============ ONLINE GAME SCREEN ============ -->
   <div id="online-game-screen" class="hidden">
+    <div class="room-code-mini">
+      Mã phòng: <b id="game-room-code-display">——</b>
+      <button id="copy-room-code-game-btn" type="button">📋 Sao chép</button>
+    </div>
     <div id="online-scoreboard" class="scoreboard"></div>
 
     <div id="online-turn-banner" class="turn-banner">
@@ -794,6 +895,10 @@
 
   <!-- ============ ONLINE END SCREEN ============ -->
   <div id="online-end-screen" class="hidden">
+    <div class="room-code-mini">
+      Mã phòng: <b id="end-room-code-display">——</b>
+      <button id="copy-room-code-end-btn" type="button">📋 Sao chép</button>
+    </div>
     <div class="winner-plate">
       <div class="trophy">🏆</div>
       <div class="lbl">Người chiến thắng</div>
@@ -818,6 +923,22 @@
       </div>
 
       <h2 class="section-title">Người chơi &amp; màu đại diện</h2>
+      <p class="hint">Có thể thêm emoji đại diện cho mỗi người (tuỳ chọn) — gõ/dán trực tiếp hoặc bấm chọn nhanh bên dưới sau khi bấm vào ô emoji của người cần đổi.</p>
+      <div class="emoji-quickpick">
+        <button type="button" class="emoji-pick-btn" data-emoji="😀">😀</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="😎">😎</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🤠">🤠</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🐱">🐱</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🐶">🐶</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🦊">🦊</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🐸">🐸</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🍀">🍀</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="⭐">⭐</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🔥">🔥</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="👑">👑</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🎯">🎯</button>
+        <button type="button" class="emoji-pick-btn clear-btn" data-emoji="">Xoá</button>
+      </div>
       <div id="player-config-list" class="player-config-list"></div>
 
       <h2 class="section-title">Giới hạn thời gian trả lời</h2>
@@ -914,7 +1035,89 @@ function findCanonical(normalized){
 /* ======================= STATE ======================= */
 const DEFAULT_COLORS = ["#c0392b","#1f6f43","#1b5da8","#b8860b","#7d3c98","#117864","#a04000","#2874a6","#943126","#1e8449"];
 
-let players = [];          // {id, name, color, active}
+/* ======================= ÂM THANH (Web Audio API, không cần file mp3) ======================= */
+let soundEnabled = localStorage.getItem("dsg_sound_enabled") !== "off";
+let sharedAudioCtx = null;
+function getAudioCtx(){
+  if(!sharedAudioCtx){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return null;
+    sharedAudioCtx = new AC();
+  }
+  if(sharedAudioCtx.state === "suspended") sharedAudioCtx.resume();
+  return sharedAudioCtx;
+}
+function playTone(freq, startTime, duration, type, peakGain){
+  const ctx = getAudioCtx();
+  if(!ctx) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type || "sine";
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, ctx.currentTime + startTime);
+  gain.gain.linearRampToValueAtTime(peakGain || 0.12, ctx.currentTime + startTime + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTime + duration);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(ctx.currentTime + startTime);
+  osc.stop(ctx.currentTime + startTime + duration + 0.02);
+}
+function playSuccessSound(){
+  if(!soundEnabled) return;
+  playTone(523.25, 0, 0.12, "sine", 0.13);
+  playTone(783.99, 0.09, 0.18, "sine", 0.13);
+}
+function playErrorSound(){
+  if(!soundEnabled) return;
+  playTone(196, 0, 0.16, "sawtooth", 0.09);
+  playTone(146.83, 0.1, 0.22, "sawtooth", 0.09);
+}
+function playWinSound(){
+  if(!soundEnabled) return;
+  const notes = [523.25, 659.25, 783.99, 1046.5];
+  notes.forEach((f,i)=> playTone(f, i*0.13, 0.28, "triangle", 0.14));
+}
+function updateSoundToggleUI(){
+  const btn = document.getElementById("sound-toggle-btn");
+  btn.textContent = soundEnabled ? "🔊" : "🔇";
+  btn.classList.toggle("muted", !soundEnabled);
+}
+document.getElementById("sound-toggle-btn").addEventListener("click", ()=>{
+  soundEnabled = !soundEnabled;
+  localStorage.setItem("dsg_sound_enabled", soundEnabled ? "on" : "off");
+  updateSoundToggleUI();
+  if(soundEnabled) playSuccessSound();
+});
+updateSoundToggleUI();
+
+/* ======================= Ô CHỌN EMOJI CHO NGƯỜI CHƠI ======================= */
+let lastFocusedEmojiInput = null;
+document.addEventListener("focusin", (e)=>{
+  if(e.target && e.target.classList && e.target.classList.contains("emoji-input")){
+    lastFocusedEmojiInput = e.target;
+  }
+});
+document.addEventListener("click", (e)=>{
+  const btn = e.target.closest(".emoji-pick-btn");
+  if(!btn) return;
+  const visibleInputs = Array.from(document.querySelectorAll(".emoji-input"))
+    .filter(el => el.offsetParent !== null);
+  const target = (lastFocusedEmojiInput && visibleInputs.includes(lastFocusedEmojiInput))
+    ? lastFocusedEmojiInput
+    : visibleInputs[0];
+  if(target){
+    target.value = btn.dataset.emoji;
+    target.dispatchEvent(new Event("change"));
+    target.focus();
+  }
+});
+function playerLabelHtml(p){
+  return (p && p.emoji ? escapeHtml(p.emoji) + " " : "") + escapeHtml(p ? p.name : "");
+}
+function playerLabelPlain(p){
+  return (p && p.emoji ? p.emoji + " " : "") + (p ? p.name : "");
+}
+
+let players = [];          // {id, name, color, emoji, active}
 let currentIdx = 0;
 let usedNormalized = new Set();
 let usedLog = [];          // {name, playerId, color}
@@ -995,6 +1198,7 @@ function myOnlineInfo(){
   return {
     name: document.getElementById("online-my-name").value.trim() || "Người chơi",
     color: document.getElementById("online-my-color").value,
+    emoji: document.getElementById("online-my-emoji").value.trim().slice(0,4),
   };
 }
 function showLobbyFeedback(msg, type){
@@ -1018,7 +1222,7 @@ document.getElementById("create-room-btn").addEventListener("click", async ()=>{
   myClientId = genClientId();
   showLobbyFeedback("Đang tạo phòng…", "");
   try{
-    const res = await apiCall("create", { name: info.name, color: info.color, clientId: myClientId });
+    const res = await apiCall("create", { name: info.name, color: info.color, emoji: info.emoji, clientId: myClientId });
     if(!res.ok){ showLobbyFeedback(res.error || "Không tạo được phòng.", "error"); return; }
     currentRoomCode = res.code;
     isHostOfRoom = true;
@@ -1040,7 +1244,7 @@ document.getElementById("join-room-btn").addEventListener("click", async ()=>{
   myClientId = genClientId();
   showLobbyFeedback("Đang kết nối tới phòng…", "");
   try{
-    const res = await apiCall("join", { code, name: info.name, color: info.color, clientId: myClientId });
+    const res = await apiCall("join", { code, name: info.name, color: info.color, emoji: info.emoji, clientId: myClientId });
     if(!res.ok){ showLobbyFeedback(res.error || "Không vào được phòng.", "error"); return; }
     currentRoomCode = code;
     room = res.room;
@@ -1115,11 +1319,12 @@ function escapeAttr(s){
   return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;");
 }
 
-async function updateMyInfo(name, color){
+async function updateMyInfo(name, color, emoji){
   if(!room || room.status !== "lobby") return;
   name = (name || "").trim().slice(0,20) || "Người chơi";
+  emoji = (emoji || "").trim().slice(0,4);
   try{
-    const res = await apiCall("update_info", { code: currentRoomCode, clientId: myClientId, name, color });
+    const res = await apiCall("update_info", { code: currentRoomCode, clientId: myClientId, name, color, emoji });
     if(res.ok){ room = res.room; rerenderCurrentOnlineScreen(); }
   }catch(err){ /* bỏ qua, sẽ đồng bộ lại ở lần poll kế tiếp */ }
 }
@@ -1150,18 +1355,21 @@ function renderRoomScreen(){
     selfRow.style.width = "100%";
     selfRow.innerHTML = `
       <input type="color" id="room-my-color" value="${me.color}">
+      <input type="text" id="room-my-emoji" class="emoji-input" placeholder="🙂" maxlength="4" value="${escapeAttr(me.emoji || "")}">
       <input type="text" id="room-my-name" value="${escapeAttr(me.name)}" maxlength="20">
       <span class="player-badge-num" id="room-self-badge">${me.clientId===room.hostId ? "👑" : "(bạn)"}</span>
     `;
     listEl.appendChild(selfRow);
     const myColorInput = document.getElementById("room-my-color");
+    const myEmojiInput = document.getElementById("room-my-emoji");
     const myNameInput = document.getElementById("room-my-name");
-    const commit = ()=> updateMyInfo(myNameInput.value, myColorInput.value);
+    const commit = ()=> updateMyInfo(myNameInput.value, myColorInput.value, myEmojiInput.value);
     myColorInput.addEventListener("change", commit);
+    myEmojiInput.addEventListener("change", commit);
     myNameInput.addEventListener("change", commit);
     myNameInput.addEventListener("keydown", e=>{ if(e.key==="Enter"){ myNameInput.blur(); } });
   } else {
-    // Cập nhật huy hiệu chủ phòng nếu có thay đổi, không đụng tới 2 ô nhập.
+    // Cập nhật huy hiệu chủ phòng nếu có thay đổi, không đụng tới các ô nhập.
     const badge = document.getElementById("room-self-badge");
     if(badge) badge.textContent = me.clientId===room.hostId ? "👑" : "(bạn)";
   }
@@ -1174,7 +1382,7 @@ function renderRoomScreen(){
     const kickBtn = isHostOfRoom
       ? `<button class="kick-btn" type="button" data-kick="${escapeAttr(p.clientId)}" title="Loại khỏi phòng">✕</button>`
       : "";
-    chip.innerHTML = `<span class="dot" style="background:${p.color}"></span>${escapeHtml(p.name)}${p.clientId===room.hostId ? " 👑" : ""}${kickBtn}`;
+    chip.innerHTML = `<span class="dot" style="background:${p.color}"></span>${playerLabelHtml(p)}${p.clientId===room.hostId ? " 👑" : ""}${kickBtn}`;
     listEl.appendChild(chip);
   });
   if(isHostOfRoom){
@@ -1241,6 +1449,8 @@ async function leaveOnlineRoom(){
 function renderOnlineGame(rm){
   if(rm.status === "ended"){ renderOnlineEnd(rm); return; }
 
+  document.getElementById("game-room-code-display").textContent = currentRoomCode || "——";
+
   const scoreboardEl = document.getElementById("online-scoreboard");
   scoreboardEl.innerHTML = "";
   rm.players.forEach(p=>{
@@ -1249,7 +1459,7 @@ function renderOnlineGame(rm){
     const kickBtn = (isHostOfRoom && p.clientId !== myClientId && p.active)
       ? `<button class="kick-btn" type="button" data-kick="${escapeAttr(p.clientId)}" title="Loại khỏi phòng">✕</button>`
       : "";
-    chip.innerHTML = `<span class="dot" style="background:${p.color}"></span>${escapeHtml(p.name)}${p.clientId===myClientId ? " (bạn)" : ""}${kickBtn}`;
+    chip.innerHTML = `<span class="dot" style="background:${p.color}"></span>${playerLabelHtml(p)}${p.clientId===myClientId ? " (bạn)" : ""}${kickBtn}`;
     scoreboardEl.appendChild(chip);
   });
   if(isHostOfRoom){
@@ -1261,7 +1471,7 @@ function renderOnlineGame(rm){
   const turnPlayer = rm.players.find(p=>p.clientId===rm.currentPlayerId) || rm.players[0];
   const banner = document.getElementById("online-turn-banner");
   banner.style.background = `linear-gradient(180deg, ${turnPlayer.color}, ${shade(turnPlayer.color,-25)})`;
-  document.getElementById("online-turn-player-name").textContent = turnPlayer.name + (turnPlayer.clientId===myClientId ? " (bạn)" : "");
+  document.getElementById("online-turn-player-name").textContent = playerLabelPlain(turnPlayer) + (turnPlayer.clientId===myClientId ? " (bạn)" : "");
   document.getElementById("online-turn-label").textContent = turnPlayer.clientId===myClientId ? "Đến lượt bạn!" : "Đến lượt";
   document.getElementById("timer-display-online").classList.add("hidden"); // chưa hỗ trợ đếm giờ online
 
@@ -1278,7 +1488,7 @@ function renderOnlineGame(rm){
   rm.usedStreets.forEach(item=>{
     const plate = document.createElement("div");
     plate.className = "street-plate";
-    plate.innerHTML = `<span class="n" style="background:${item.color}"></span>${escapeHtml(item.name)}`;
+    plate.innerHTML = `<span class="n" style="background:${item.color}"></span>${item.emoji ? escapeHtml(item.emoji) + " " : ""}${escapeHtml(item.name)}`;
     logEl.appendChild(plate);
   });
   document.getElementById("online-street-total").textContent = rm.usedStreets.length;
@@ -1286,11 +1496,12 @@ function renderOnlineGame(rm){
 
 let onlineEndAnimated = false;
 function renderOnlineEnd(rm){
-  if(!onlineEndAnimated){ onlineEndAnimated = true; launchConfetti(); }
+  document.getElementById("end-room-code-display").textContent = currentRoomCode || "——";
+  if(!onlineEndAnimated){ onlineEndAnimated = true; launchConfetti(); playWinSound(); }
   const winner = rm.players.find(p=>p.clientId===rm.winnerId);
   if(winner){
     document.getElementById("online-winner-dot").style.background = winner.color;
-    document.getElementById("online-winner-name").textContent = winner.name + (winner.clientId===myClientId ? " (bạn)" : "");
+    document.getElementById("online-winner-name").textContent = playerLabelPlain(winner) + (winner.clientId===myClientId ? " (bạn)" : "");
     const cnt = rm.usedStreets.filter(s=>s.playerId===winner.clientId).length;
     document.getElementById("online-winner-stat").textContent =
       `Đã kể tổng cộng ${rm.usedStreets.length} con đường trong ván này, trong đó ${winner.name} đóng góp ${cnt} đường.`;
@@ -1309,15 +1520,17 @@ function showOnlineFeedback(msg, type){
 async function submitStreetOnline(){
   const input = document.getElementById("online-street-input");
   const raw = input.value.trim();
-  if(!raw){ showOnlineFeedback("Bạn chưa nhập tên đường nào cả.", "error"); return; }
+  if(!raw){ showOnlineFeedback("Bạn chưa nhập tên đường nào cả.", "error"); playErrorSound(); return; }
   const norm = normalizeName(raw);
   if(!STREET_SET.has(norm)){
     showOnlineFeedback(`"${raw}" không có trong danh sách đường ở TPHCM. Thử lại nhé!`, "error");
+    playErrorSound();
     input.select();
     return;
   }
   if(!room || room.status !== "playing" || room.currentPlayerId !== myClientId){
     showOnlineFeedback("Chưa tới lượt bạn — đợi chút rồi thử lại nhé.", "error");
+    playErrorSound();
     return;
   }
   input.value = "";
@@ -1326,13 +1539,16 @@ async function submitStreetOnline(){
     const res = await apiCall("submit", { code: currentRoomCode, clientId: myClientId, streetRaw: raw });
     if(!res.ok){
       showOnlineFeedback(res.error || "Có lỗi khi gửi, thử lại nhé.", "error");
+      playErrorSound();
       return;
     }
     room = res.room;
     rerenderCurrentOnlineScreen();
     showOnlineFeedback(`✓ Đã kể "${res.canonical || raw}".`, "ok");
+    playSuccessSound();
   }catch(err){
     showOnlineFeedback("Không kết nối được tới máy chủ, thử lại nhé.", "error");
+    playErrorSound();
   }
 }
 
@@ -1342,6 +1558,12 @@ document.getElementById("online-street-input").addEventListener("keydown", e=>{
 });
 document.getElementById("online-quit-btn").addEventListener("click", leaveOnlineRoom);
 document.getElementById("online-home-btn").addEventListener("click", leaveOnlineRoom);
+document.getElementById("copy-room-code-game-btn").addEventListener("click", ()=>{
+  if(currentRoomCode && navigator.clipboard) navigator.clipboard.writeText(currentRoomCode).catch(()=>{});
+});
+document.getElementById("copy-room-code-end-btn").addEventListener("click", ()=>{
+  if(currentRoomCode && navigator.clipboard) navigator.clipboard.writeText(currentRoomCode).catch(()=>{});
+});
 
 /* ---------- Nhận diện giọng nói cho ô nhập online ---------- */
 (function setupOnlineMic(){
@@ -1377,6 +1599,7 @@ function renderPlayerConfig(){
     row.innerHTML = `
       <span class="player-badge-num">#${i+1}</span>
       <input type="color" id="color-${i}" value="${DEFAULT_COLORS[i % DEFAULT_COLORS.length]}">
+      <input type="text" id="emoji-${i}" class="emoji-input" placeholder="🙂" maxlength="4">
       <input type="text" id="name-${i}" placeholder="Tên người chơi ${i+1}" maxlength="20">
     `;
     playerConfigList.appendChild(row);
@@ -1410,8 +1633,10 @@ document.getElementById("start-game-btn").addEventListener("click", ()=>{
   for(let i=0;i<playerCount;i++){
     const nameInput = document.getElementById(`name-${i}`);
     const colorInput = document.getElementById(`color-${i}`);
+    const emojiInput = document.getElementById(`emoji-${i}`);
     const name = (nameInput.value.trim() || `Người chơi ${i+1}`);
-    players.push({ id: i, name, color: colorInput.value, active: true });
+    const emoji = emojiInput.value.trim().slice(0,4);
+    players.push({ id: i, name, color: colorInput.value, emoji, active: true });
   }
   currentIdx = 0;
   usedNormalized = new Set();
@@ -1439,7 +1664,7 @@ function renderScoreboard(){
   players.forEach(p=>{
     const chip = document.createElement("div");
     chip.className = "player-chip" + (p.active ? "" : " out") + (p.active && p.id === players[currentIdx].id ? " current" : "");
-    chip.innerHTML = `<span class="dot" style="background:${p.color}"></span>${escapeHtml(p.name)}`;
+    chip.innerHTML = `<span class="dot" style="background:${p.color}"></span>${playerLabelHtml(p)}`;
     scoreboardEl.appendChild(chip);
   });
 }
@@ -1447,7 +1672,7 @@ function renderScoreboard(){
 function renderTurnBanner(){
   const p = players[currentIdx];
   turnBannerEl.style.background = `linear-gradient(180deg, ${p.color}, ${shade(p.color,-25)})`;
-  turnPlayerNameEl.textContent = p.name;
+  turnPlayerNameEl.textContent = playerLabelPlain(p);
   streetInput.style.borderColor = p.color;
   streetInput.style.background = p.color;
   startLocalTurnTimer();
@@ -1458,7 +1683,7 @@ function renderStreetLog(){
   usedLog.forEach(item=>{
     const plate = document.createElement("div");
     plate.className = "street-plate";
-    plate.innerHTML = `<span class="n" style="background:${item.color}"></span>${escapeHtml(item.name)}`;
+    plate.innerHTML = `<span class="n" style="background:${item.color}"></span>${item.emoji ? escapeHtml(item.emoji) + " " : ""}${escapeHtml(item.name)}`;
     streetLogEl.appendChild(plate);
   });
   streetTotalEl.textContent = usedLog.length;
@@ -1515,17 +1740,20 @@ function submitStreet(){
   const raw = streetInput.value.trim();
   if(!raw){
     showFeedback("Bạn chưa nhập tên đường nào cả.", "error");
+    playErrorSound();
     return;
   }
   const norm = normalizeName(raw);
 
   if(!STREET_SET.has(norm)){
     showFeedback(`"${raw}" không có trong danh sách đường ở TPHCM. Thử lại nhé!`, "error");
+    playErrorSound();
     streetInput.select();
     return;
   }
   if(usedNormalized.has(norm)){
     showFeedback(`"${raw}" đã được kể rồi. Kể đường khác đi!`, "error");
+    playErrorSound();
     streetInput.select();
     return;
   }
@@ -1533,9 +1761,10 @@ function submitStreet(){
   const canonical = findCanonical(norm) || raw;
   const player = players[currentIdx];
   usedNormalized.add(norm);
-  usedLog.unshift({ name: canonical, playerId: player.id, color: player.color });
+  usedLog.unshift({ name: canonical, playerId: player.id, color: player.color, emoji: player.emoji });
   renderStreetLog();
   showFeedback(`✓ Hợp lệ! ${player.name} đã kể "${canonical}".`, "ok");
+  playSuccessSound();
 
   streetInput.value = "";
 
@@ -1599,10 +1828,11 @@ function endGame(){
   clearLocalTurnTimer();
   showScreen("end");
   launchConfetti();
+  playWinSound();
   const winner = activePlayers()[0];
   if(winner){
     document.getElementById("winner-dot").style.background = winner.color;
-    document.getElementById("winner-name").textContent = winner.name;
+    document.getElementById("winner-name").textContent = playerLabelPlain(winner);
     const winnerStreetCount = usedLog.filter(s=>s.playerId===winner.id).length;
     document.getElementById("winner-stat").textContent =
       `Đã kể tổng cộng ${usedLog.length} con đường trong ván này, trong đó ${winner.name} đóng góp ${winnerStreetCount} đường.`;
