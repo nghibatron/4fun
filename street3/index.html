@@ -977,6 +977,8 @@ let isHostOfRoom = false;
 let myClientId = null;
 let room = null;            // trạng thái phòng mới nhất đọc được từ máy chủ
 let pollTimer = null;
+let isPolling = false;      // chặn việc gọi chồng lấn nếu request trước chưa xong
+let lastRenderedRoomJson = null; // để phát hiện "không có gì thay đổi" và bỏ qua vẽ lại
 
 function genClientId(){
   if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
@@ -1072,7 +1074,8 @@ function stopPolling(){
   if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
 }
 async function pollState(){
-  if(!currentRoomCode) return;
+  if(!currentRoomCode || isPolling) return;
+  isPolling = true;
   try{
     const res = await apiGet({ action: "state", code: currentRoomCode });
     if(!res.ok){
@@ -1083,14 +1086,26 @@ async function pollState(){
       return;
     }
     room = res.room;
-    rerenderCurrentOnlineScreen();
+    // Chỉ vẽ lại giao diện khi dữ liệu THỰC SỰ thay đổi so với lần vẽ trước.
+    // Nếu không, cứ 2 giây lại xoá/tạo lại toàn bộ danh sách sẽ gây giật,
+    // nháy hình, và làm mất focus/con trỏ nếu đang gõ trong ô nhập.
+    const json = JSON.stringify(room);
+    if(json !== lastRenderedRoomJson){
+      lastRenderedRoomJson = json;
+      rerenderCurrentOnlineScreen();
+    }
   }catch(err){
     // lỗi mạng tạm thời khi poll — bỏ qua, thử lại ở lần poll kế tiếp
+  }finally{
+    isPolling = false;
   }
 }
 
 function enterRoomScreen(){
   onlineEndAnimated = false;
+  lastRenderedRoomJson = null;
+  const staleRow = document.getElementById("room-self-row");
+  if(staleRow) staleRow.remove();
   showScreen("onlineRoom");
   showRoomCodeUI();
   rerenderCurrentOnlineScreen();
@@ -1123,6 +1138,7 @@ async function updateMyInfo(name, color){
 
 function rerenderCurrentOnlineScreen(){
   if(!room) return;
+  lastRenderedRoomJson = JSON.stringify(room);
   const target = room.status === "lobby" ? "onlineRoom" : (room.status === "playing" ? "onlineGame" : "onlineEnd");
   if(currentScreenName !== target) showScreen(target);
   if(target === "onlineRoom") renderRoomScreen();
@@ -1132,43 +1148,54 @@ function rerenderCurrentOnlineScreen(){
 
 function renderRoomScreen(){
   const listEl = document.getElementById("room-player-list");
-  listEl.innerHTML = "";
-  room.players.forEach(p=>{
-    if(p.clientId === myClientId){
-      const row = document.createElement("div");
-      row.className = "player-config-row";
-      row.style.width = "100%";
-      row.innerHTML = `
-        <input type="color" id="room-my-color" value="${p.color}">
-        <input type="text" id="room-my-name" value="${escapeAttr(p.name)}" maxlength="20">
-        <span class="player-badge-num">${p.clientId===room.hostId ? "👑" : "(bạn)"}</span>
-      `;
-      listEl.appendChild(row);
-    } else {
-      const chip = document.createElement("div");
-      chip.className = "player-chip";
-      const kickBtn = isHostOfRoom
-        ? `<button class="kick-btn" type="button" data-kick="${escapeAttr(p.clientId)}" title="Loại khỏi phòng">✕</button>`
-        : "";
-      chip.innerHTML = `<span class="dot" style="background:${p.color}"></span>${escapeHtml(p.name)}${p.clientId===room.hostId ? " 👑" : ""}${kickBtn}`;
-      listEl.appendChild(chip);
-    }
+  const me = room.players.find(p => p.clientId === myClientId);
+  const others = room.players.filter(p => p.clientId !== myClientId);
+
+  // Hàng "của mình" (ô nhập tên + màu): chỉ TẠO MỘT LẦN, không xoá/tạo lại
+  // mỗi lần vẽ lại — nếu không, mỗi lần poll (2 giây/lần) sẽ phá mất ô
+  // đang gõ dở, làm mất con trỏ/focus và cảm giác giật.
+  let selfRow = document.getElementById("room-self-row");
+  if(!selfRow){
+    selfRow = document.createElement("div");
+    selfRow.id = "room-self-row";
+    selfRow.className = "player-config-row";
+    selfRow.style.width = "100%";
+    selfRow.innerHTML = `
+      <input type="color" id="room-my-color" value="${me.color}">
+      <input type="text" id="room-my-name" value="${escapeAttr(me.name)}" maxlength="20">
+      <span class="player-badge-num" id="room-self-badge">${me.clientId===room.hostId ? "👑" : "(bạn)"}</span>
+    `;
+    listEl.appendChild(selfRow);
+    const myColorInput = document.getElementById("room-my-color");
+    const myNameInput = document.getElementById("room-my-name");
+    const commit = ()=> updateMyInfo(myNameInput.value, myColorInput.value);
+    myColorInput.addEventListener("change", commit);
+    myNameInput.addEventListener("change", commit);
+    myNameInput.addEventListener("keydown", e=>{ if(e.key==="Enter"){ myNameInput.blur(); } });
+  } else {
+    // Cập nhật huy hiệu chủ phòng nếu có thay đổi, không đụng tới 2 ô nhập.
+    const badge = document.getElementById("room-self-badge");
+    if(badge) badge.textContent = me.clientId===room.hostId ? "👑" : "(bạn)";
+  }
+
+  // Các người chơi khác: không có ô nhập nên rebuild thoải mái, không lo mất focus.
+  listEl.querySelectorAll(".player-chip").forEach(el => el.remove());
+  others.forEach(p=>{
+    const chip = document.createElement("div");
+    chip.className = "player-chip";
+    const kickBtn = isHostOfRoom
+      ? `<button class="kick-btn" type="button" data-kick="${escapeAttr(p.clientId)}" title="Loại khỏi phòng">✕</button>`
+      : "";
+    chip.innerHTML = `<span class="dot" style="background:${p.color}"></span>${escapeHtml(p.name)}${p.clientId===room.hostId ? " 👑" : ""}${kickBtn}`;
+    listEl.appendChild(chip);
   });
-  document.getElementById("room-player-total").textContent = room.players.length;
   if(isHostOfRoom){
     listEl.querySelectorAll("[data-kick]").forEach(btn=>{
       btn.addEventListener("click", ()=> kickPlayer(btn.dataset.kick));
     });
   }
 
-  const myColorInput = document.getElementById("room-my-color");
-  const myNameInput = document.getElementById("room-my-name");
-  if(myColorInput && myNameInput){
-    const commit = ()=> updateMyInfo(myNameInput.value, myColorInput.value);
-    myColorInput.addEventListener("change", commit);
-    myNameInput.addEventListener("change", commit);
-    myNameInput.addEventListener("keydown", e=>{ if(e.key==="Enter"){ myNameInput.blur(); } });
-  }
+  document.getElementById("room-player-total").textContent = room.players.length;
 
   const hostActions = document.getElementById("room-host-actions");
   const waitingHint = document.getElementById("room-waiting-hint");
