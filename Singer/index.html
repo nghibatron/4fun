@@ -1,0 +1,1937 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kể Tên Ca Sĩ — Trò chơi kể tên nghệ sĩ Việt &amp; Quốc tế</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --plate-blue:#123a63;
+    --plate-blue-dark:#0b2645;
+    --paper:#f2ede0;
+    --paper-dark:#e7dfc9;
+    --ink:#1b1b18;
+    --brass:#c99a3c;
+    --brass-light:#e7bd63;
+    --white:#ffffff;
+    --red:#a5333c;
+    --line:#d8cfb5;
+    --radius:10px;
+    --shadow: 0 6px 18px rgba(20,25,15,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 10%, rgba(201,154,60,0.10), transparent 45%),
+      radial-gradient(circle at 90% 85%, rgba(18,58,99,0.10), transparent 40%),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Be Vietnam Pro', system-ui, sans-serif;
+    min-height:100vh;
+    padding:24px 14px 60px;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+
+  /* ---------- Header / plate title ---------- */
+  .title-plate{
+    background:linear-gradient(180deg,var(--plate-blue),var(--plate-blue-dark));
+    border-radius:6px;
+    border:3px solid var(--brass);
+    box-shadow:var(--shadow), inset 0 0 0 2px rgba(255,255,255,0.08);
+    padding:20px 22px 16px;
+    text-align:center;
+    position:relative;
+    margin-bottom:22px;
+  }
+  .title-plate::before, .title-plate::after{
+    content:"";
+    position:absolute;
+    width:10px;height:10px;
+    border-radius:50%;
+    background:var(--brass-light);
+    top:8px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
+  }
+  .title-plate::before{left:10px;}
+  .title-plate::after{right:10px;}
+  .eyebrow{
+    font-family:'Oswald',sans-serif;
+    letter-spacing:0.35em;
+    font-size:11px;
+    color:var(--brass-light);
+    text-transform:uppercase;
+    margin:0 0 4px;
+  }
+  .title-plate h1{
+    font-family:'Oswald',sans-serif;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    color:var(--white);
+    font-size:clamp(28px,6vw,44px);
+    margin:0 0 6px;
+    text-shadow:0 2px 0 rgba(0,0,0,0.25);
+  }
+  .subtitle{
+    color:#cfe0f0;
+    font-size:14px;
+    margin:0;
+  }
+
+  .card{
+    background:var(--white);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    border:1px solid var(--line);
+    padding:22px;
+    margin-bottom:18px;
+  }
+  h2.section-title{
+    font-family:'Oswald',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    font-size:15px;
+    color:var(--plate-blue);
+    margin:0 0 14px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  h2.section-title::before{
+    content:"";
+    width:18px;height:3px;
+    background:var(--brass);
+    display:inline-block;
+    border-radius:2px;
+  }
+
+  /* ---------- Mode select ---------- */
+  .hidden{display:none !important;}
+  .mode-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-bottom:14px;
+  }
+  .mode-card{
+    background:var(--white);
+    border:2px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:24px 18px;
+    text-align:center;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    transition:all .15s;
+    font-family:inherit;
+  }
+  .mode-card:hover{
+    border-color:var(--brass);
+    transform:translateY(-2px);
+    box-shadow:0 10px 22px rgba(20,25,15,0.22);
+  }
+  .mode-icon{font-size:34px;}
+  .mode-title{
+    font-family:'Oswald',sans-serif;
+    text-transform:uppercase;
+    font-weight:700;
+    font-size:16px;
+    color:var(--plate-blue);
+  }
+  .mode-desc{font-size:12.5px;color:#6b6558;line-height:1.5;}
+  .storage-warning{
+    font-size:12.5px;
+    color:var(--red);
+    background:#fdf0ee;
+    border:1px solid var(--red);
+    border-radius:8px;
+    padding:10px 14px;
+    line-height:1.6;
+  }
+  @media (max-width:560px){ .mode-grid{grid-template-columns:1fr;} }
+
+  .back-link{
+    background:none;
+    border:none;
+    color:var(--plate-blue);
+    font-family:'Oswald',sans-serif;
+    font-weight:600;
+    font-size:12.5px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    cursor:pointer;
+    padding:0 0 14px;
+    display:inline-block;
+  }
+  .back-link:hover{color:var(--brass);}
+
+  /* ---------- Online lobby ---------- */
+  .lobby-split{
+    display:flex;
+    gap:18px;
+    align-items:stretch;
+    margin-top:6px;
+  }
+  .lobby-half{flex:1;min-width:0;}
+  .lobby-divider{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#9a927e;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+  }
+  .room-code-input{
+    width:100%;
+    font-family:'Oswald',sans-serif;
+    font-size:22px;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    text-align:center;
+    padding:12px;
+    border-radius:6px;
+    border:2px solid var(--plate-blue);
+  }
+  @media (max-width:560px){
+    .lobby-split{flex-direction:column;}
+    .lobby-divider{padding:4px 0;}
+  }
+
+  .room-code-card{text-align:center;}
+  .room-code-display{
+    font-family:'Oswald',sans-serif;
+    font-size:clamp(32px,10vw,52px);
+    font-weight:700;
+    letter-spacing:0.25em;
+    color:var(--plate-blue);
+    background:var(--paper);
+    border:2px dashed var(--brass);
+    border-radius:8px;
+    padding:14px;
+    margin:8px 0 14px;
+  }
+
+  /* ---------- Setup screen ---------- */
+  .player-count-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+  }
+  .stepper{
+    display:flex;
+    align-items:center;
+    border:2px solid var(--plate-blue);
+    border-radius:8px;
+    overflow:hidden;
+  }
+  .stepper button{
+    width:40px;height:40px;
+    border:none;
+    background:var(--paper-dark);
+    color:var(--plate-blue);
+    font-size:20px;
+    font-weight:700;
+    cursor:pointer;
+    transition:background .15s;
+  }
+  .stepper button:hover{background:var(--brass-light);}
+  .stepper span{
+    width:48px;
+    text-align:center;
+    font-family:'Oswald',sans-serif;
+    font-size:20px;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .hint{
+    font-size:13px;
+    color:#6b6558;
+  }
+
+  .player-config-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .player-config-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:8px 10px;
+  }
+  .player-config-row input[type="color"]{
+    width:38px;height:38px;
+    border:none;
+    border-radius:8px;
+    padding:0;
+    cursor:pointer;
+    background:none;
+    flex-shrink:0;
+  }
+  .player-config-row input[type="text"]{
+    flex:1;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:9px 10px;
+    font-family:'Be Vietnam Pro',sans-serif;
+    font-size:14px;
+    min-width:0;
+  }
+  .player-config-row input[type="text"]:focus{
+    outline:2px solid var(--plate-blue);
+    outline-offset:1px;
+  }
+  .player-badge-num{
+    font-family:'Oswald',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    color:#8a8371;
+    width:20px;
+    text-align:center;
+    flex-shrink:0;
+  }
+
+  .btn{
+    font-family:'Oswald',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    font-weight:600;
+    font-size:14px;
+    border-radius:8px;
+    border:none;
+    padding:13px 22px;
+    cursor:pointer;
+    transition:transform .12s, box-shadow .12s, background .15s;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{
+    background:linear-gradient(180deg,var(--plate-blue),var(--plate-blue-dark));
+    color:var(--white);
+    box-shadow:0 4px 0 var(--plate-blue-dark), var(--shadow);
+  }
+  .btn-primary:hover{box-shadow:0 4px 0 var(--plate-blue-dark), 0 8px 16px rgba(18,58,99,0.3);}
+  .btn-primary:disabled{
+    background:#b9b6ac;
+    box-shadow:none;
+    cursor:not-allowed;
+  }
+  .btn-quit{
+    background:var(--white);
+    color:var(--red);
+    border:2px solid var(--red);
+    box-shadow:none;
+    padding:9px 16px;
+    font-size:12px;
+  }
+  .btn-quit:hover{background:var(--red);color:var(--white);}
+  .btn-secondary{
+    background:var(--paper-dark);
+    color:var(--ink);
+    border:1px solid var(--line);
+    box-shadow:none;
+  }
+  .btn-secondary:hover{background:var(--brass-light);}
+
+  .setup-actions{display:flex;justify-content:flex-end;gap:10px;}
+
+  /* ---------- Game screen ---------- */
+  #game-screen{display:none;}
+  #setup-screen.hidden, #game-screen.hidden, #end-screen.hidden{display:none;}
+
+  .scoreboard{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .player-chip{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--white);
+    border:2px solid var(--line);
+    border-radius:999px;
+    padding:6px 14px 6px 8px;
+    font-size:13px;
+    font-weight:600;
+    transition:all .2s;
+  }
+  .player-chip .dot{
+    width:14px;height:14px;
+    border-radius:50%;
+    flex-shrink:0;
+    box-shadow:inset 0 0 0 2px rgba(255,255,255,0.5);
+  }
+  .player-chip.current{
+    border-color:var(--brass);
+    background:#fff8ea;
+    box-shadow:0 0 0 3px rgba(201,154,60,0.25);
+  }
+  .player-chip.out{
+    opacity:0.45;
+    text-decoration:line-through;
+  }
+  .kick-btn{
+    margin-left:2px;
+    width:18px;height:18px;
+    border-radius:50%;
+    border:none;
+    background:var(--paper-dark);
+    color:var(--red);
+    font-size:11px;
+    line-height:1;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    transition:background .15s, color .15s;
+  }
+  .kick-btn:hover{
+    background:var(--red);
+    color:var(--white);
+  }
+
+  .turn-banner{
+    text-align:center;
+    padding:16px;
+    border-radius:8px;
+    margin-bottom:16px;
+    color:var(--white);
+    font-family:'Oswald',sans-serif;
+    letter-spacing:0.03em;
+    box-shadow:var(--shadow);
+    transition:background .3s;
+  }
+  .turn-banner .lbl{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.3em;
+    opacity:0.85;
+    margin-bottom:4px;
+  }
+  .turn-banner .name{
+    font-size:24px;
+    font-weight:700;
+    text-transform:uppercase;
+  }
+  .timer-display{
+    margin-top:8px;
+    display:inline-block;
+    font-family:'Oswald',sans-serif;
+    font-size:18px;
+    font-weight:700;
+    padding:4px 14px;
+    border-radius:999px;
+    background:rgba(255,255,255,0.18);
+    letter-spacing:0.05em;
+    transition:background .2s, color .2s;
+  }
+  .timer-display.urgent{
+    background:var(--red);
+    color:var(--white);
+    animation:timer-pulse .6s infinite;
+  }
+  @keyframes timer-pulse{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.08);}
+  }
+
+  .toggle-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:14px;
+    color:var(--ink);
+    cursor:pointer;
+    margin-bottom:14px;
+  }
+  .toggle-row input[type="checkbox"]{
+    width:18px;height:18px;
+    accent-color:var(--plate-blue);
+    cursor:pointer;
+  }
+
+  .input-row{
+    display:flex;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  #street-input, #online-street-input{
+    flex:1;
+    min-width:0;
+    font-family:'Oswald',sans-serif;
+    font-size:20px;
+    letter-spacing:0.02em;
+    text-transform:uppercase;
+    padding:14px 16px;
+    border-radius:6px;
+    border:3px solid var(--plate-blue);
+    background:var(--plate-blue);
+    color:var(--white);
+  }
+  #street-input::placeholder, #online-street-input::placeholder{
+    color:#a9c1d8;
+    text-transform:none;
+    font-family:'Be Vietnam Pro',sans-serif;
+    font-size:14px;
+    letter-spacing:normal;
+  }
+  #street-input:focus, #online-street-input:focus{
+    outline:none;
+    border-color:var(--brass);
+  }
+  #online-street-input:disabled{
+    opacity:0.6;
+    cursor:not-allowed;
+  }
+  .mic-btn{
+    width:56px;
+    flex-shrink:0;
+    border-radius:6px;
+    border:3px solid var(--plate-blue);
+    background:var(--white);
+    color:var(--plate-blue);
+    font-size:22px;
+    cursor:pointer;
+    transition:all .15s;
+  }
+  .mic-btn:hover{background:var(--paper-dark);}
+  .mic-btn.listening{
+    background:var(--red);
+    border-color:var(--red);
+    color:var(--white);
+    animation:pulse 1s infinite;
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(165,51,60,0.5);}
+    50%{box-shadow:0 0 0 8px rgba(165,51,60,0);}
+  }
+
+  .feedback{
+    min-height:22px;
+    font-size:13px;
+    font-weight:600;
+    margin-bottom:14px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .feedback.error{color:var(--red);}
+  .feedback.ok{color:#2b7a4b;}
+
+  .game-actions{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:22px;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .street-count{
+    font-size:13px;
+    color:#6b6558;
+  }
+  .street-count b{color:var(--plate-blue);font-family:'Oswald',sans-serif;font-size:16px;}
+
+  .street-log{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .street-log:empty::after{
+    content:"Chưa có đường nào được kể — người chơi đầu tiên hãy bắt đầu!";
+    color:#9a927e;
+    font-size:13px;
+    font-style:italic;
+  }
+  .street-plate{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    background:linear-gradient(180deg,var(--plate-blue),var(--plate-blue-dark));
+    color:var(--white);
+    border-radius:4px;
+    padding:7px 10px 7px 8px;
+    font-family:'Oswald',sans-serif;
+    font-size:12.5px;
+    letter-spacing:0.02em;
+    text-transform:uppercase;
+    box-shadow:0 2px 4px rgba(0,0,0,0.2);
+    border-left:5px solid var(--brass);
+    animation:dropIn .3s ease;
+  }
+  @keyframes dropIn{
+    from{opacity:0;transform:translateY(-6px) scale(0.95);}
+    to{opacity:1;transform:translateY(0) scale(1);}
+  }
+  .street-plate .n{
+    width:9px;height:9px;
+    border-radius:50%;
+    flex-shrink:0;
+  }
+
+  /* ---------- End screen ---------- */
+  #end-screen{display:none;text-align:center;}
+  .winner-plate{
+    background:linear-gradient(180deg,var(--brass-light),var(--brass));
+    border-radius:8px;
+    padding:32px 20px;
+    box-shadow:var(--shadow);
+    margin-bottom:20px;
+    border:3px solid var(--plate-blue);
+    position:relative;
+    overflow:hidden;
+    animation:winner-pop .55s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes winner-pop{
+    0%{ transform:scale(0.6) rotate(-4deg); opacity:0; }
+    60%{ transform:scale(1.06) rotate(1deg); opacity:1; }
+    100%{ transform:scale(1) rotate(0deg); }
+  }
+  .winner-plate .trophy{
+    font-size:38px;
+    display:inline-block;
+    animation:trophy-bounce 1.1s ease-in-out infinite;
+    margin-bottom:6px;
+  }
+  @keyframes trophy-bounce{
+    0%,100%{ transform:translateY(0) rotate(-6deg); }
+    50%{ transform:translateY(-8px) rotate(6deg); }
+  }
+  .winner-plate .lbl{
+    font-family:'Oswald',sans-serif;
+    letter-spacing:0.3em;
+    font-size:13px;
+    text-transform:uppercase;
+    color:var(--plate-blue-dark);
+    margin-bottom:6px;
+  }
+  .winner-plate .dot{
+    width:22px;height:22px;
+    border-radius:50%;
+    display:inline-block;
+    vertical-align:middle;
+    margin-right:10px;
+    box-shadow:inset 0 0 0 3px rgba(255,255,255,0.6);
+  }
+  .winner-plate .wname{
+    font-family:'Oswald',sans-serif;
+    font-weight:700;
+    font-size:clamp(26px,7vw,40px);
+    color:var(--plate-blue-dark);
+    text-transform:uppercase;
+  }
+  .winner-plate .stat{
+    margin-top:10px;
+    font-size:14px;
+    color:var(--plate-blue-dark);
+  }
+
+  /* ---------- Confetti ---------- */
+  .confetti-layer{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:9999;
+  }
+  .confetti-piece{
+    position:absolute;
+    top:-24px;
+    width:8px;
+    height:14px;
+    opacity:0.95;
+    animation-name:confetti-fall;
+    animation-timing-function:cubic-bezier(.4,0,.6,1);
+    animation-fill-mode:forwards;
+  }
+  @keyframes confetti-fall{
+    0%{ transform:translateY(0) rotate(0deg); opacity:1; }
+    100%{ transform:translateY(105vh) rotate(600deg); opacity:0; }
+  }
+
+  footer.note{
+    text-align:center;
+    font-size:12px;
+    color:#9a927e;
+    margin-top:26px;
+    line-height:1.7;
+  }
+
+  @media (max-width:520px){
+    .input-row{flex-direction:column;}
+    .mic-btn{width:100%;height:46px;}
+  }
+  #sound-toggle-btn{
+    position:fixed;
+    top:12px;
+    right:12px;
+    z-index:50;
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    border:2px solid var(--plate-blue);
+    background:#fff;
+    font-size:18px;
+    cursor:pointer;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);
+  }
+  #sound-toggle-btn.muted{ opacity:0.55; }
+
+  .emoji-input{
+    width:52px !important;
+    flex:0 0 52px;
+    text-align:center;
+    font-size:18px;
+    padding:8px 4px !important;
+    border-radius:6px;
+    border:2px solid var(--plate-blue);
+  }
+  .emoji-quickpick{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin:6px 0 12px;
+  }
+  .emoji-pick-btn{
+    font-size:18px;
+    line-height:1;
+    padding:6px 8px;
+    border-radius:8px;
+    border:1px solid #d8cfb8;
+    background:#fff;
+    cursor:pointer;
+  }
+  .emoji-pick-btn:hover{ background:#f3ead3; }
+  .emoji-pick-btn.clear-btn{ font-size:13px; color:#a5333c; }
+
+  .room-code-mini{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    justify-content:center;
+    font-size:14px;
+    color:#6b6252;
+    margin-bottom:10px;
+  }
+  .room-code-mini b{
+    font-size:16px;
+    letter-spacing:2px;
+    color:var(--plate-blue);
+  }
+  .room-code-mini button{
+    border:1px solid #d8cfb8;
+    background:#fff;
+    border-radius:6px;
+    padding:2px 8px;
+    cursor:pointer;
+    font-size:13px;
+  }
+</style>
+</head>
+<body>
+<button id="sound-toggle-btn" type="button" title="Bật/tắt âm thanh" aria-label="Bật/tắt âm thanh">🔊</button>
+<div class="wrap">
+
+  <div class="title-plate">
+    <p class="eyebrow">Trò chơi đối kháng · Thành phố Hồ Chí Minh</p>
+    <h1>Kể Tên Ca Sĩ</h1>
+    <p class="subtitle">Lần lượt kể tên một ca sĩ/nhóm nhạc (Việt Nam, quốc tế, K-pop, J-pop...) — ai bí trước thì bỏ cuộc, người trụ lại cuối cùng thắng!</p>
+  </div>
+
+  <!-- ============ MODE SELECT SCREEN ============ -->
+  <div id="mode-select-screen">
+    <div class="mode-grid">
+      <button class="mode-card" id="pick-local-mode" type="button">
+        <span class="mode-icon">🎮</span>
+        <span class="mode-title">Chơi chung một máy</span>
+        <span class="mode-desc">Ngồi cạnh nhau, truyền tay/nói lần lượt trên cùng một thiết bị.</span>
+      </button>
+      <button class="mode-card" id="pick-online-mode" type="button">
+        <span class="mode-icon">🌐</span>
+        <span class="mode-title">Chơi online nhiều người</span>
+        <span class="mode-desc">Mỗi người một thiết bị riêng, vào chung một phòng bằng mã phòng.</span>
+      </button>
+    </div>
+    <p id="storage-warning" class="storage-warning hidden">
+      ⚠️ Không tải được thư viện kết nối trực tuyến (có thể do mất mạng). Hãy kiểm tra kết nối Internet rồi thử lại, hoặc chơi chế độ chung một máy.
+    </p>
+    <p id="mode-select-notice" class="storage-warning hidden"></p>
+  </div>
+
+  <!-- ============ ONLINE LOBBY SCREEN (create / join) ============ -->
+  <div id="online-lobby-screen" class="hidden">
+    <div class="card">
+      <button class="back-link" id="lobby-back-btn" type="button">← Quay lại</button>
+      <h2 class="section-title">Địa chỉ máy chủ (Apps Script)</h2>
+      <p class="hint">Dán link Web App Apps Script bạn đã deploy (xem hướng dẫn kèm theo). Chỉ cần dán 1 lần, trình duyệt sẽ nhớ cho lần sau.</p>
+      <div class="player-config-list">
+        <div class="player-config-row" style="width:100%;">
+          <input type="text" id="apps-script-url" placeholder="https://script.google.com/macros/s/XXXX/exec" style="flex:1;width:100%;padding:10px;border-radius:6px;border:2px solid var(--plate-blue);">
+        </div>
+      </div>
+
+      <h2 class="section-title">Thông tin của bạn</h2>
+      <div class="emoji-quickpick">
+        <button type="button" class="emoji-pick-btn" data-emoji="😀">😀</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="😎">😎</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🤠">🤠</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🐱">🐱</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🐶">🐶</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🦊">🦊</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🐸">🐸</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🍀">🍀</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="⭐">⭐</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🔥">🔥</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="👑">👑</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🎯">🎯</button>
+        <button type="button" class="emoji-pick-btn clear-btn" data-emoji="">Xoá</button>
+      </div>
+      <div class="player-config-list">
+        <div class="player-config-row">
+          <input type="color" id="online-my-color" value="#c0392b">
+          <input type="text" id="online-my-emoji" class="emoji-input" placeholder="🙂" maxlength="4">
+          <input type="text" id="online-my-name" placeholder="Tên của bạn" maxlength="20">
+        </div>
+      </div>
+
+      <div class="lobby-split">
+        <div class="lobby-half">
+          <h2 class="section-title">Tạo phòng mới</h2>
+          <p class="hint">Bạn sẽ là chủ phòng, nhận mã phòng để gửi cho bạn bè.</p>
+          <button id="create-room-btn" class="btn btn-primary" type="button">Tạo phòng</button>
+        </div>
+        <div class="lobby-divider"><span>hoặc</span></div>
+        <div class="lobby-half">
+          <h2 class="section-title">Tham gia phòng</h2>
+          <input type="text" id="join-room-code" class="room-code-input" placeholder="MÃ PHÒNG" maxlength="6" autocomplete="off">
+          <button id="join-room-btn" class="btn btn-secondary" type="button" style="margin-top:10px;width:100%;">Vào phòng</button>
+        </div>
+      </div>
+      <div id="lobby-feedback" class="feedback"></div>
+    </div>
+  </div>
+
+  <!-- ============ ONLINE ROOM (waiting) SCREEN ============ -->
+  <div id="online-room-screen" class="hidden">
+    <div class="card room-code-card">
+      <p class="hint" style="margin:0 0 4px;">Mã phòng — gửi cho bạn bè để cùng tham gia</p>
+      <div class="room-code-display" id="room-code-display">——</div>
+      <button id="copy-room-code-btn" class="btn btn-secondary" type="button">📋 Sao chép mã phòng</button>
+    </div>
+    <div class="card">
+      <h2 class="section-title">Người chơi trong phòng <span class="street-count">(<b id="room-player-total">0</b>)</span></h2>
+      <div class="emoji-quickpick">
+        <button type="button" class="emoji-pick-btn" data-emoji="😀">😀</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="😎">😎</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🤠">🤠</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🐱">🐱</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🐶">🐶</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🦊">🦊</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🐸">🐸</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🍀">🍀</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="⭐">⭐</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🔥">🔥</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="👑">👑</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🎯">🎯</button>
+        <button type="button" class="emoji-pick-btn clear-btn" data-emoji="">Xoá</button>
+      </div>
+      <div id="room-player-list" class="scoreboard"></div>
+      <div id="room-host-actions" class="setup-actions hidden" style="margin-top:16px;">
+        <button id="start-online-game-btn" class="btn btn-primary" type="button">Bắt đầu chơi</button>
+      </div>
+      <p id="room-waiting-hint" class="hint" style="margin-top:14px;"></p>
+      <div class="setup-actions" style="margin-top:10px;">
+        <button id="leave-room-btn" class="btn btn-quit" type="button">Rời phòng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ONLINE GAME SCREEN ============ -->
+  <div id="online-game-screen" class="hidden">
+    <div class="room-code-mini">
+      Mã phòng: <b id="game-room-code-display">——</b>
+      <button id="copy-room-code-game-btn" type="button">📋 Sao chép</button>
+    </div>
+    <div id="online-scoreboard" class="scoreboard"></div>
+
+    <div id="online-turn-banner" class="turn-banner">
+      <div class="lbl" id="online-turn-label">Đến lượt</div>
+      <div class="name" id="online-turn-player-name">—</div>
+      <div class="timer-display hidden" id="timer-display-online">30s</div>
+    </div>
+
+    <div class="card">
+      <div class="input-row">
+        <input type="text" id="online-street-input" placeholder="Nhập tên một ca sĩ/nhóm nhạc…" autocomplete="off" disabled>
+        <button id="online-mic-btn" class="mic-btn" type="button" title="Nói tên đường" aria-label="Nói tên đường">🎤</button>
+      </div>
+      <div id="online-feedback" class="feedback"></div>
+      <div class="game-actions">
+        <button id="online-submit-btn" class="btn btn-primary" type="button" disabled>Xác nhận</button>
+        <button id="online-quit-btn" class="btn btn-quit" type="button">🚪 Rời phòng (bỏ cuộc)</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Những nghệ sĩ đã kể <span class="street-count">(<b id="online-street-total">0</b>)</span></h2>
+      <div id="online-street-log" class="street-log"></div>
+    </div>
+  </div>
+
+  <!-- ============ ONLINE END SCREEN ============ -->
+  <div id="online-end-screen" class="hidden">
+    <div class="room-code-mini">
+      Mã phòng: <b id="end-room-code-display">——</b>
+      <button id="copy-room-code-end-btn" type="button">📋 Sao chép</button>
+    </div>
+    <div class="winner-plate">
+      <div class="trophy">🏆</div>
+      <div class="lbl">Người chiến thắng</div>
+      <div class="wname"><span class="dot" id="online-winner-dot"></span><span id="online-winner-name">—</span></div>
+      <div class="stat" id="online-winner-stat"></div>
+    </div>
+    <button id="online-home-btn" class="btn btn-primary" type="button">Về trang chủ</button>
+  </div>
+
+  <!-- ============ SETUP SCREEN ============ -->
+  <div id="setup-screen" class="hidden">
+    <div class="card">
+      <button class="back-link" id="setup-back-btn" type="button">← Quay lại</button>
+      <h2 class="section-title">Số người chơi</h2>
+      <div class="player-count-row">
+        <div class="stepper">
+          <button id="dec-player" type="button" aria-label="Giảm số người chơi">−</button>
+          <span id="player-count-display">2</span>
+          <button id="inc-player" type="button" aria-label="Tăng số người chơi">+</button>
+        </div>
+        <span class="hint">Tối thiểu 2, tối đa 10 người chơi.</span>
+      </div>
+
+      <h2 class="section-title">Người chơi &amp; màu đại diện</h2>
+      <p class="hint">Có thể thêm emoji đại diện cho mỗi người (tuỳ chọn) — gõ/dán trực tiếp hoặc bấm chọn nhanh bên dưới sau khi bấm vào ô emoji của người cần đổi.</p>
+      <div class="emoji-quickpick">
+        <button type="button" class="emoji-pick-btn" data-emoji="😀">😀</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="😎">😎</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🤠">🤠</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🐱">🐱</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🐶">🐶</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🦊">🦊</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🐸">🐸</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🍀">🍀</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="⭐">⭐</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🔥">🔥</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="👑">👑</button>
+        <button type="button" class="emoji-pick-btn" data-emoji="🎯">🎯</button>
+        <button type="button" class="emoji-pick-btn clear-btn" data-emoji="">Xoá</button>
+      </div>
+      <div id="player-config-list" class="player-config-list"></div>
+
+      <h2 class="section-title">Giới hạn thời gian trả lời</h2>
+      <label class="toggle-row">
+        <input type="checkbox" id="enable-timer-local">
+        <span>Bật đếm giờ mỗi lượt — hết giờ tự bị loại (bỏ cuộc)</span>
+      </label>
+      <div class="player-count-row" id="timer-seconds-row-local" style="display:none;">
+        <div class="stepper">
+          <button id="dec-timer-local" type="button" aria-label="Giảm số giây">−</button>
+          <span id="timer-seconds-display-local">30</span>
+          <button id="inc-timer-local" type="button" aria-label="Tăng số giây">+</button>
+        </div>
+        <span class="hint">giây mỗi lượt (10–120 giây).</span>
+      </div>
+
+      <div class="setup-actions">
+        <button id="start-game-btn" class="btn btn-primary" type="button">Bắt đầu chơi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ GAME SCREEN ============ -->
+  <div id="game-screen">
+    <div id="scoreboard" class="scoreboard"></div>
+
+    <div id="turn-banner" class="turn-banner">
+      <div class="lbl">Đến lượt</div>
+      <div class="name" id="turn-player-name">—</div>
+      <div class="timer-display hidden" id="timer-display-local">30s</div>
+    </div>
+
+    <div class="card">
+      <div class="input-row">
+        <input type="text" id="street-input" placeholder="Nhập tên một ca sĩ/nhóm nhạc…" autocomplete="off">
+        <button id="mic-btn" class="mic-btn" type="button" title="Nói tên đường" aria-label="Nói tên đường">🎤</button>
+      </div>
+      <div id="feedback" class="feedback"></div>
+      <div class="game-actions">
+        <button id="submit-btn" class="btn btn-primary" type="button">Xác nhận</button>
+        <button id="quit-btn" class="btn btn-quit" type="button">🚩 Bỏ cuộc</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Những nghệ sĩ đã kể <span class="street-count">(<b id="street-total">0</b>)</span></h2>
+      <div id="street-log" class="street-log"></div>
+    </div>
+  </div>
+
+  <!-- ============ END SCREEN ============ -->
+  <div id="end-screen">
+    <div class="winner-plate">
+      <div class="trophy">🏆</div>
+      <div class="lbl">Người chiến thắng</div>
+      <div class="wname"><span class="dot" id="winner-dot"></span><span id="winner-name">—</span></div>
+      <div class="stat" id="winner-stat"></div>
+    </div>
+    <button id="restart-btn" class="btn btn-primary" type="button">Chơi ván mới</button>
+  </div>
+
+  <footer class="note">
+    Dữ liệu tên ca sĩ/nhóm nhạc (Việt Nam, quốc tế, K-pop, J-pop) tổng hợp từ nhiều nguồn, chỉ dùng để tham khảo cho trò chơi — có thể chưa đầy đủ hoặc còn sai sót.<br>
+    Chế độ online dùng một Google Apps Script Web App (do người triển khai tự tạo và deploy miễn phí, không cần server riêng) làm nơi lưu trạng thái phòng — dữ liệu ván chơi đi qua tài khoản Google Sheets của người triển khai, không đi qua máy chủ của Claude/Anthropic. Cần dán đúng địa chỉ Web App vào ô cấu hình trước khi tạo/vào phòng.<br>
+    Nhận diện giọng nói (nếu trình duyệt hỗ trợ) dùng để nhập nhanh tên đường bằng tiếng Việt.
+  </footer>
+</div>
+
+<script>
+/* ======================= DỮ LIỆU TÊN CA SĨ / NHÓM NHẠC ======================= */
+const SINGERS = ["&TEAM", "(G)I-DLE", "*NSYNC", "21 Savage", "2NE1", "2Pac", "3 Doors Down", "4minute", "5 Seconds of Summer", "50 Cent", "52Hz", "A$AP Rocky", "a-ha", "A.R. Rahman", "ABBA", "AC/DC", "Ace of Base", "Adele", "Ado", "Aerosmith", "aespa", "AFROJACK", "Ai", "Ai Otsuka", "Aikatsu Stars", "Aimer", "Aimyon", "Aina the End", "AKB48", "Akon", "Alan Walker", "Alejandro Fernández", "Alejandro Sanz", "Alessia Cara", "Alesso", "Alex Warren", "Alicia Keys", "Alka Yagnik", "Amber", "Amee", "America", "Amy Winehouse", "An Cafe", "Anderson .Paak", "Angela", "Angerme", "Anh Thơ", "Anitta", "Anly", "Anne-Marie", "Annie Lennox", "Anri", "Anuel AA", "AOA", "Apink", "Aqours", "Aqua Timez", "Arashi", "Arctic Monkeys", "Arcángel", "Ari Lesmana", "Ariana Grande", "Arijit Singh", "Armaan Malik", "Asian Kung-Fu Generation", "Astro", "ATEEZ", "Atif Aslam", "Audioslave", "AURORA", "Ava Max", "Aventura", "Avicii", "Avril Lavigne", "Aya Hirano", "Aya Nakamura", "Ayra Starr", "Ayumi Hamasaki", "B Ray", "B'z", "B.o.B", "Babymetal", "BABYMONSTER", "Backstreet Boys", "Bad Bunny", "Badshah", "Baek Yerin", "Baekhyun", "BAND-MAID", "Bang Chan", "Bastille", "BE'O", "beabadoobee", "Beast", "Bebe Rexha", "Becky G", "Bee Gees", "Beenzino", "Ben E. King", "benny blanco", "Benny Dayal", "Benson Boone", "Berryz Koubou", "Beyoncé", "BEYOOOOONDS", "Beéle", "Big Sean", "BIGBANG", "Billie Eilish", "Billlie", "Billy Idol", "Billy Joel", "Binz", "BiSH", "Bizarrap", "Black Eyed Peas", "Black Sabbath", "BLACKPINK", "Blessd", "blink-182", "Blondie", "BoA", "Bob Marley", "Bon Jovi", "Boney M.", "Bonnie Tyler", "BOYNEXTDOOR", "Brent Faiyaz", "Britney Spears", "Bruce Springsteen", "Bruno Mars", "Bryan Adams", "BTS", "Bump of Chicken", "Burna Boy", "Busta Rhymes", "Bích Phương", "Bùi Anh Tuấn", "Bùi Lan Hương", "Bảo Anh", "Bảo Thy", "Bằng Cường", "Bằng Kiều", "C-ute", "Calibre 50", "Calum Scott", "Calvin Harris", "Camila Cabello", "Camilo", "Capital Cities", "Capsule", "Cardi B", "Carlos Vives", "Carly Rae Jepsen", "Carín León", "CeeLo Green", "Central Cee", "Chaeryeong", "Chaeyoung", "Chai", "Changbin", "Changmo", "Chanyeol", "Chappell Roan", "Chara", "Charli xcx", "Charlie Puth", "Chase Atlantic", "Chemistry", "Chen", "Chencho Corleone", "Cherry Bullet", "Chi Dân", "Chi Pu", "Childish Gambino", "Chris Brown", "Chris Stapleton", "Christina Aguilera", "Christina Perri", "Chungha", "Châu Bùi", "Chí Tài", "Chế Linh", "Chế Thanh", "Cigarettes After Sex", "Cinderella Girls", "CL", "Clairo", "Clean Bandit", "Colde", "Coldplay", "Conan Gray", "Coolio", "Cornelius", "Country Girls", "Cravity", "Creed", "Creedence Clearwater Revival", "Cris MJ", "Crush", "Crystal Kay", "Céline Dion", "Cẩm Ly", "Cẩm Vân", "D.O.", "d4vd", "Da LAB", "Da-iCE", "DaBaby", "Daddy Yankee", "Daesung", "Daft Punk", "Dahyun", "Daniel Caesar", "Danny Ocean", "Dave", "David Bowie", "David Guetta", "Dean", "Def Tech", "Deftones", "Demi Lovato", "Depeche Mode", "Destiny's Child", "Dido", "Diljit Dosanjh", "Diplo", "Dir En Grey", "Dire Straits", "Disclosure", "Diễm Liên", "Diệu Nhi", "DJ Khaled", "DJ Snake", "Djo", "DKZ", "Do As Infinity", "Doechii", "Doja Cat", "Dolly Parton", "Dominic Fike", "Don Hồ", "Don Omar", "Don Toliver", "Donghae", "Double2T", "Dr. Dre", "Dragon Ash", "Drake", "Dua Lipa", "Duy Khánh", "Dương Domic", "Dương Triệu Vũ", "E-girls", "Eagles", "Earth, Wind & Fire", "Ed Sheeran", "El Alfa", "Eladio Carrion", "Electric Light Orchestra", "Ella Langley", "Ellegarden", "Ellie Goulding", "Elton John", "Elvis Phương", "Elvis Presley", "Emily", "Eminem", "Empire Of The Sun", "ENHYPEN", "Enrique Iglesias", "Erik", "Eslabon Armado", "Eunhyuk", "Eurythmics", "Evanescence", "Eve", "Every Little Thing", "EXID", "EXILE", "EXILE ATSUSHI", "EXO", "f(x)", "Fall Out Boy", "Farruko", "Feid", "Felix", "Fergie", "Fetty Wap", "FictionJunction", "FISHER", "Fleetwood Mac", "Flo Rida", "Florence + The Machine", "Flower Companyz", "Flumpool", "Foo Fighters", "Foorin", "Foreigner", "Foster The People", "Frank Ocean", "Frank Sinatra", "French Montana", "fromis_9", "Fuerza Regida", "Fujii Kaze", "fun.", "Future", "G-Dragon", "G-Eazy", "Gabry Ponte", "Gackt", "Gaeul", "Gen Hoshino", "Generations", "Gente De Zona", "George Michael", "GFRIEND", "Giao Linh", "Gigi Perez", "Girls' Generation", "Giselle", "Glass Animals", "GLAY", "Gorillaz", "GOT7", "Gotye", "Gracie Abrams", "Greeeen", "Green Day", "Grupo Firme", "Grupo Frontera", "Gunhead", "Gunna", "Guns N' Roses", "Gwen Stefani", "Ha Sung Woon", "Hachi", "Halsey", "Han", "Hari Won", "Hariharan", "Harry Styles", "Hatsune Miku", "Heechul", "Heize", "Hello! Project", "Hey! Say! JUMP", "Hieuthuhai", "Highlight", "Hikari Mitsushima", "Hikaru Utada", "Hinatazaka46", "Hiroshi Fujiwara", "Hiroyuki Sawano", "Hiền Hồ", "Hiền Thục", "HKT48", "Hongjoong", "Hoobastank", "Hozier", "Hoài Lâm", "Hoàng Dũng", "Hoàng Hải", "Hoàng Oanh", "Hoàng Quyên", "Hoàng Thùy Linh", "Hoàng Yến Chibi", "HUGEL", "Hwasa", "Hyde", "Hyoyeon", "Hyuna", "Hyunjin", "Hà Anh Tuấn", "Hà Okio", "Hà Phương", "Hòa Minzy", "Hùng Cường", "Hương Giang", "Hương Thanh", "Hương Thủy", "Hương Tràm", "Hồ Bích Ngọc", "Hồ Lệ Thu", "Hồ Ngọc Hà", "Hồ Quỳnh Hương", "Hồ Vĩnh Khoa", "Hồng Nhung", "I.N", "Ice Cube", "Icona Pop", "Idolmaster", "Ikimono-gakari", "iKON", "Iku", "Imagine Dragons", "Imogen Heap", "Infinite", "Isaac", "ITZY", "IU", "IVE", "J Balvin", "J-Hope", "J. Cole", "Jack", "Jack Harlow", "James Arthur", "Jason Derulo", "Jason Mraz", "Jay Park", "JAY-Z", "Jelly Roll", "Jennie", "Jennifer Lopez", "Jeongyeon", "Jeremih", "Jess Glynne", "Jessica", "Jessie J", "JID", "Jihyo", "Jimin", "Jin", "Jisoo", "Joe Hisaishi", "John Legend", "John Mayer", "John Newman", "Johnny's Jr.", "Johnny's West", "Joji", "Jonas Blue", "Jonas Brothers", "Jongho", "Journey", "JSol", "Juan Luis Guerra", "Juice WRLD", "Juice=Juice", "JUJU", "Juky San", "Jungkook", "Junior H", "Junko Ohashi", "JustaTee", "Justin Bieber", "Justin Timberlake", "K-ICM", "Kacey Musgraves", "Kaela Kimura", "Kagamine Rin Len", "Kai", "Kalafina", "Kali Uchis", "Kana Nishino", "Kanaria", "Kang Daniel", "Kangin", "Kanjani8", "Kanye West", "KARA", "Karan Aujla", "Karik", "Karina", "KAROL G", "KATSEYE", "Katy Perry", "Keane", "Kehlani", "Kelly Clarkson", "Kelly Rowland", "Ken Ashcorp", "Kendrick Lamar", "Kenny Rogers", "Kenshi Yonezu", "Kep1er", "Kesha", "Ketsumeishi", "Key", "Keyakizaka46", "Keyshia Cole", "Khalid", "Khánh Ly", "Khắc Việt", "Khổng Tú Quỳnh", "Khởi My", "Kid Cudi", "Kikuo", "Kim Jae Hwan", "King & Prince", "King Gnu", "Kings of Leon", "Kinki Kids", "Kis-My-Ft2", "KISS", "Kobukuro", "Kodak Black", "Kris", "Krystal", "Kumar Sanu", "Kumi Koda", "Kyary Pamyu Pamyu", "Kygo", "Kylie Minogue", "Kyuhyun", "L'Arc-en-Ciel", "Lady Gaga", "Lam Trường", "Lamoon", "Lana Del Rey", "Lata Mangeshkar", "Laufey", "LAUV", "Lay", "LE SSERAFIM", "Led Zeppelin", "Lee Hi", "Lee Know", "Leeseo", "Leeteuk", "Lewis Capaldi", "Lia", "Lil Baby", "Lil Durk", "Lil Nas X", "Lil Tecca", "Lil Uzi Vert", "Lil Wayne", "Limp Bizkit", "Linkin Park", "Lisa", "LiSA", "Lisa Ono", "Liz", "Loco", "LOONA", "Lorde", "Lost Frequencies", "Lou Hoàng", "Love Live", "Low G", "Luhan", "Luis Fonsi", "Luis Miguel", "Lukas Graham", "Luke Combs", "Luna", "Luna Sea", "Lyhan", "Lyly", "Lynda Trang Đài", "Lynk Lee", "Lâm Bảo Ngọc", "Lâm Nhật Tiến", "Lê Anh Dũng", "Lưu Quang Minh", "Lương Bích Hữu", "Lệ Quyên", "m-flo", "M83", "Mac DeMarco", "Mac Miller", "Macklemore", "Madonna", "Mafumafu", "MAGIC!", "Mai Khôi", "Major Lazer", "Malcolm Todd", "Malice Mizer", "Maluma", "Mamamoo", "Manuel Turizo", "Maná", "Marc Anthony", "Maria Becerra", "Mariah Carey", "Mariya Takeuchi", "Mark Ronson", "Maroon 5", "Marshmello", "Martin Garrix", "Marvin Gaye", "Mary J. Blige", "Masaharu Fukuyama", "MCK", "Megan Thee Stallion", "Meghan Trainor", "Megurine Luka", "Metallica", "Metro Boomin", "MGMT", "Michael Jackson", "Migos", "Miguel", "Milet", "Miley Cyrus", "Miliyah Kato", "Milky Chance", "Min", "Mina", "Minami", "Mingi", "Minh Hằng", "Minho", "Minnie", "Minori Chihara", "Mitski", "Miu Lê", "Miwa", "Miyavi", "Miyeon", "Miyuki Nakajima", "Mohit Chauhan", "Momo", "Momoiro Clover Z", "Mon Laferte", "Monsta X", "Moonbyul", "Morgan Wallen", "Morning Musume", "Mr.Children", "Mrs. GREEN APPLE", "Ms. Lauryn Hill", "Muse", "My Chemical Romance", "Myke Towers", "Måneskin", "Mạnh Quỳnh", "Mạnh Đình", "Mỹ Linh", "Mỹ Tâm", "Nafla", "Nam Cường", "Namie Amuro", "Nana Mizuki", "Nanase Aikawa", "Naniwa Danshi", "Naotaro Moriyama", "Natasha Bedingfield", "Nate Ruess", "Nayeon", "NCT", "NCT 127", "NCT Dream", "Ne-Yo", "Nelly", "Nelly Furtado", "NewJeans", "NEWS", "NGT48", "Nguyễn Phi Hùng", "Nguyễn Thùy Lâm", "Nguyễn Trần Trung Quân", "Ngô Kiến Huy", "Ngô Thanh Vân", "Ngọc Bích Ngân", "Ngọc Sơn", "Ngọt", "Như Loan", "Như Quỳnh", "Nhật Sơn", "Nickelback", "Nicki Minaj", "Nicky Jam", "Nijigasaki", "Nile Rodgers", "Ningning", "Nirvana", "NMB48", "NMIXX", "Noah Kahan", "Nogizaka46", "Noo Phước Thịnh", "Nujabes", "Oasis", "Obito", "Official HIGE DANdism", "Offset", "Oh My Girl", "Oliver Tree", "Olivia Dean", "Olivia Rodrigo", "One Direction", "ONE OK ROCK", "OneRepublic", "Onew", "Onewe", "ONF", "Ong Seong Wu", "Only C", "Orange", "Orange Range", "Osad", "Outkast", "Ozuna", "P!nk", "P1Harmony", "Pamungkas", "Panic! At The Disco", "Paramore", "PARTYNEXTDOOR", "Paulo Londra", "Pearl Jam", "Pentagon", "Perfume", "Peso Pluma", "pH-1", "Phan Mạnh Quỳnh", "Pharrell Williams", "Phi Nhung", "Phil Collins", "Phương Dung", "Phương Ly", "Phương Mỹ Chi", "Phạm Duy", "Phạm Lương Thanh Trúc", "Phạm Phương Thảo", "Phạm Quỳnh Anh", "Pink Floyd", "PinkPantheress", "Piso 21", "Pitbull", "Pizzicato Five", "Plan B", "Playboi Carti", "Post Malone", "Prince", "Prince Royce", "Pritam", "PSY", "Quang Hùng MasterD", "Quang Lê", "Quang Vinh", "Queen", "Quevedo", "Quý Dương", "Quốc Thiên", "R.E.M.", "Radiohead", "RADWIMPS", "Rae Sremmurd", "Rahat Fateh Ali Khan", "Rain", "Rauw Alejandro", "RAYE", "Red Hot Chili Peppers", "Red Velvet", "Rei", "Rema", "Reol", "Reona", "Rhyder", "Rhymastic", "Rick Ross", "Ricky Martin", "Rie Tanaka", "Rihanna", "RIIZE", "Ringo Sheena", "Rip Slyme", "RM", "Robin Schulz", "Rod Stewart", "Roddy Ricch", "Romeo Santos", "ROSALÍA", "Rosé", "Roxette", "RPT MCK", "Ryan Castro", "Ryeowook", "Ryujin", "Sabrina Carpenter", "Sade", "Sakurazaka46", "Sam Smith", "San", "Sana", "Sandaime J Soul Brothers", "Santana", "Scandal", "Scorpions", "Sean Kingston", "Sean Paul", "Sebastian Yatra", "Sech", "See-Saw", "Sehun", "Sekai no Owari", "Selena Gomez", "Seohyun", "Seonghwa", "Seungmin", "SEVENTEEN", "Sexy Zone", "Sexyy Red", "SF9", "Shaggy", "Shakira", "Shania Twain", "Shawn Mendes", "Sheena Ringo", "Shiina Ringo", "Shindong", "SHINee", "Shreya Ghoshal", "Shuhua", "Sia", "Sid Sriram", "Sik-K", "Silent Siren", "Simon Dominic", "Siu Black", "Siwon", "SixTONES", "SKE48", "Skrillex", "Slipknot", "SMAP", "Snoop Dogg", "Snow Man", "Solar", "sombr", "Somi", "Sonu Nigam", "Soobin Hoàng Sơn", "Sooyoung", "Soraru", "Southern All Stars", "Soyeon", "Sphere", "Spitz", "STAYC", "Steve Aoki", "Steve Lacy", "Stevie Wonder", "Stray Kids", "Stromae", "STU48", "Suboi", "Suga", "Suho", "Summer Walker", "Sungmin", "Suni Hạ Linh", "Sunmi", "Sunny", "Super Junior", "Superfly", "Swae Lee", "Swedish House Mafia", "System Of A Down", "SZA", "Sĩ Thanh", "Sơn Tùng M-TP", "T-Pain", "T.M.Revolution", "Taemin", "Taeyang", "Taeyeon", "Tainy", "Tame Impala", "Tao", "Tate McRae", "Tatsuro Yamashita", "Taylor Swift", "Tears For Fears", "Teddy Swims", "Tems", "Thanh Lam", "Thanh Thảo", "Thanh Tuyền", "The 1975", "The Beatles", "The Boyz", "The Chainsmokers", "The Cranberries", "The Cure", "The Gazette", "The Goo Goo Dolls", "The Jackson 5", "The Kid LAROI", "The Killers", "The Lumineers", "The Marías", "The Neighbourhood", "The Notorious B.I.G.", "The Offspring", "The Police", "The Pussycat Dolls", "The Rolling Stones", "The Script", "The Smiths", "The Strokes", "The Temper Trap", "The Weeknd", "Thelma Aoyama", "Thu Hiền", "Thu Minh", "Thu Phương", "Thành Được", "Thái Thanh", "Thùy Chi", "Thế Hiển", "Thế Sơn", "Thủy Tiên", "Tiffany", "Timbaland", "Tinashe", "Tiên Cookie", "Tiësto", "TLC", "tlinh", "Tokio", "Tom Odell", "TOMORROW X TOGETHER", "Tones And I", "Topic", "Tory Lanez", "Tove Lo", "Towa Tei", "Train", "Travis Japan", "Travis Scott", "TREASURE", "Trippie Redd", "Trish Thuy Trang", "Troye Sivan", "Trung Kiên", "Trung Quang", "Trúc Nhân", "Trường Vũ", "Trần Hiếu", "Trần Lập", "Trần Thu Hà", "Trọng Hiếu", "Trọng Tấn", "Tsubaki Factory", "Tuyu", "Tuấn Ngọc", "Tuấn Vũ", "Twenty One Pilots", "TWICE", "TXT", "Ty Dolla $ign", "Tyga", "Tyla", "Tyler, The Creator", "Tzuyu", "Tân Nhàn", "Tóc Tiên", "Tùng Dương", "U2", "Usher", "Utada Hikaru", "Uyên Linh", "V", "V6", "Vamps", "Vance Joy", "Vaundy", "Verbal", "Vicky Nhung", "Victoria", "VIXX", "Vân Khánh", "Văn Mai Hương", "Vũ Cát Tường", "Vũ Khanh", "Vũ.", "Wake Up, Girls!", "WanBi Tuấn Anh", "Wands", "WayV", "Weeekly", "Weezer", "Wheein", "Whitney Houston", "will.i.am", "WILLOW", "WINNER", "Winter", "Wisin & Yandel", "Wiz Khalifa", "Wizkid", "Wonder Girls", "Wonyoung", "Woodie Gochild", "Wooyoung", "Wowy", "Wren Evans", "Wxrdie", "X Japan", "Xavi", "xikers", "Xiumin", "Xuân Hinh", "XXXTENTACION", "Y Phụng", "Ya Suy", "Yandel", "Yeat", "Yeji", "Yeosang", "Yesung", "YOASOBI", "Yoona", "Yorushika", "Young Thug", "YoungBoy Never Broke Again", "Younha", "Yui", "Yui Horie", "Yujin", "Yuki Kajiura", "Yuna", "Yuqi", "Yuri", "Yuuri", "Yuzu", "Zach Bryan", "Zara Larsson", "ZAYN", "Zedd", "ZEROBASEONE", "Zico", "Zion & Lennox", "Zutomayo", "Ái Vân", "Ánh Minh", "Ánh Tuyết", "Ý Lan", "Đan Nguyên", "Đan Trường", "Đen Vâu", "Đoan Trang", "Đàm Vĩnh Hưng", "Đông Nhi", "Đăng Dương", "Đạt G", "Đức Phúc", "μ's"];
+
+/* ======================= CHUẨN HÓA CHUỖI ======================= */
+function stripDiacritics(str){
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D");
+}
+// "Chuẩn hóa lỏng": bỏ hết dấu (kể cả dấu thanh điệu) + bỏ MỌI ký tự
+// không phải chữ/số (khoảng trắng, dấu chấm, gạch ngang, ngoặc, dấu &...).
+// Nhờ vậy "AC/DC", "ac dc", "Ac-Dc" hay "(G)I-DLE" / "gidle" đều khớp
+// nhau. Có thể khiến 2 nghệ sĩ khác nhau (chỉ khác dấu thanh điệu, ví dụ
+// tên tiếng Việt) trở thành y hệt nhau — xem resolveSinger bên dưới.
+function normalizeName(str){
+  let s = stripDiacritics(str.trim().toLowerCase());
+  s = s.replace(/[^a-z0-9]/g, "");
+  return s;
+}
+// "Chuẩn hóa chặt": chỉ gộp khoảng trắng + cắt đầu/cuối, GIỮ NGUYÊN toàn
+// bộ dấu, ký tự đặc biệt VÀ chữ hoa/thường (khác chữ thường/HOA đôi khi
+// mang ý nghĩa phân biệt 2 nghệ sĩ, vd. "Lisa" và "LiSA" là 2 người khác
+// nhau). Dùng để phân biệt chính xác khi người chơi gõ đúng.
+function strictNormalizeName(str){
+  return str.trim().replace(/\s+/g," ");
+}
+
+// Nhóm các tên nghệ sĩ theo dạng "bỏ dấu + bỏ ký tự đặc biệt": mỗi khoá
+// có thể ứng với NHIỀU tên thật khác nhau.
+const STREET_LOOSE_GROUPS = new Map();
+// Map "chuẩn hóa chặt" (giữ dấu) -> tên chính thức, dùng để nhận diện
+// chính xác tên nào khi người chơi gõ đúng dấu.
+const STREET_STRICT_TO_CANONICAL = new Map();
+SINGERS.forEach(name=>{
+  const loose = normalizeName(name);
+  if(!STREET_LOOSE_GROUPS.has(loose)) STREET_LOOSE_GROUPS.set(loose, []);
+  const group = STREET_LOOSE_GROUPS.get(loose);
+  if(!group.includes(name)) group.push(name);
+  STREET_STRICT_TO_CANONICAL.set(strictNormalizeName(name), name);
+});
+// Giữ lại để tương thích với các chỗ khác chỉ cần kiểm tra "có phải tên
+// nghệ sĩ hợp lệ hay không" mà chưa cần biết chính xác là tên nào.
+const STREET_SET = new Set(STREET_LOOSE_GROUPS.keys());
+
+/**
+ * Xác định tên nghệ sĩ chính xác từ chuỗi người chơi gõ.
+ * Trả về { ok:true, canonical } nếu nhận diện được rõ ràng, hoặc
+ * { ok:false, error, ambiguous? } nếu không hợp lệ / bị trùng khi bỏ dấu.
+ */
+function resolveStreet(raw){
+  const strict = strictNormalizeName(raw);
+  if(STREET_STRICT_TO_CANONICAL.has(strict)){
+    return { ok:true, canonical: STREET_STRICT_TO_CANONICAL.get(strict) };
+  }
+  const loose = normalizeName(raw);
+  const group = STREET_LOOSE_GROUPS.get(loose);
+  if(!group){
+    return { ok:false, error: `"${raw}" không có trong danh sách ca sĩ/nhóm nhạc.` };
+  }
+  if(group.length === 1){
+    return { ok:true, canonical: group[0] };
+  }
+  return {
+    ok:false,
+    ambiguous:true,
+    error: `Có nhiều nghệ sĩ trùng nhau khi bỏ dấu: ${group.join(", ")}. Vui lòng gõ đầy đủ và chính xác để chọn đúng người.`,
+  };
+}
+
+/* ======================= STATE ======================= */
+const DEFAULT_COLORS = ["#c0392b","#1f6f43","#1b5da8","#b8860b","#7d3c98","#117864","#a04000","#2874a6","#943126","#1e8449"];
+
+/* ======================= ÂM THANH (Web Audio API, không cần file mp3) ======================= */
+let soundEnabled = localStorage.getItem("dsg_sound_enabled") !== "off";
+let sharedAudioCtx = null;
+function getAudioCtx(){
+  if(!sharedAudioCtx){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return null;
+    sharedAudioCtx = new AC();
+  }
+  if(sharedAudioCtx.state === "suspended") sharedAudioCtx.resume();
+  return sharedAudioCtx;
+}
+function playTone(freq, startTime, duration, type, peakGain){
+  const ctx = getAudioCtx();
+  if(!ctx) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type || "sine";
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, ctx.currentTime + startTime);
+  gain.gain.linearRampToValueAtTime(peakGain || 0.12, ctx.currentTime + startTime + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTime + duration);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(ctx.currentTime + startTime);
+  osc.stop(ctx.currentTime + startTime + duration + 0.02);
+}
+function playSuccessSound(){
+  if(!soundEnabled) return;
+  playTone(523.25, 0, 0.12, "sine", 0.13);
+  playTone(783.99, 0.09, 0.18, "sine", 0.13);
+}
+function playErrorSound(){
+  if(!soundEnabled) return;
+  playTone(196, 0, 0.16, "sawtooth", 0.09);
+  playTone(146.83, 0.1, 0.22, "sawtooth", 0.09);
+}
+function playWinSound(){
+  if(!soundEnabled) return;
+  const notes = [523.25, 659.25, 783.99, 1046.5];
+  notes.forEach((f,i)=> playTone(f, i*0.13, 0.28, "triangle", 0.14));
+}
+function updateSoundToggleUI(){
+  const btn = document.getElementById("sound-toggle-btn");
+  btn.textContent = soundEnabled ? "🔊" : "🔇";
+  btn.classList.toggle("muted", !soundEnabled);
+}
+document.getElementById("sound-toggle-btn").addEventListener("click", ()=>{
+  soundEnabled = !soundEnabled;
+  localStorage.setItem("dsg_sound_enabled", soundEnabled ? "on" : "off");
+  updateSoundToggleUI();
+  if(soundEnabled) playSuccessSound();
+});
+updateSoundToggleUI();
+
+/* ======================= Ô CHỌN EMOJI CHO NGƯỜI CHƠI ======================= */
+let lastFocusedEmojiInput = null;
+document.addEventListener("focusin", (e)=>{
+  if(e.target && e.target.classList && e.target.classList.contains("emoji-input")){
+    lastFocusedEmojiInput = e.target;
+  }
+});
+document.addEventListener("click", (e)=>{
+  const btn = e.target.closest(".emoji-pick-btn");
+  if(!btn) return;
+  const visibleInputs = Array.from(document.querySelectorAll(".emoji-input"))
+    .filter(el => el.offsetParent !== null);
+  const target = (lastFocusedEmojiInput && visibleInputs.includes(lastFocusedEmojiInput))
+    ? lastFocusedEmojiInput
+    : visibleInputs[0];
+  if(target){
+    target.value = btn.dataset.emoji;
+    target.dispatchEvent(new Event("change"));
+    target.focus();
+  }
+});
+function playerLabelHtml(p){
+  return (p && p.emoji ? escapeHtml(p.emoji) + " " : "") + escapeHtml(p ? p.name : "");
+}
+function playerLabelPlain(p){
+  return (p && p.emoji ? p.emoji + " " : "") + (p ? p.name : "");
+}
+
+let players = [];          // {id, name, color, emoji, active}
+let currentIdx = 0;
+let usedCanonicalSet = new Set(); // tập tên đường chính thức (canonical) đã dùng trong ván này
+let usedLog = [];          // {name, playerId, color}
+
+/* ======================= MÀN HÌNH & CHUYỂN CHẾ ĐỘ ======================= */
+const screens = {
+  modeSelect: document.getElementById("mode-select-screen"),
+  setup: document.getElementById("setup-screen"),
+  game: document.getElementById("game-screen"),
+  end: document.getElementById("end-screen"),
+  onlineLobby: document.getElementById("online-lobby-screen"),
+  onlineRoom: document.getElementById("online-room-screen"),
+  onlineGame: document.getElementById("online-game-screen"),
+  onlineEnd: document.getElementById("online-end-screen"),
+};
+let currentScreenName = "modeSelect";
+function showScreen(name){
+  currentScreenName = name;
+  Object.entries(screens).forEach(([key, el])=>{
+    if(!el) return;
+    el.classList.toggle("hidden", key !== name);
+    // các màn cũ dùng inline style thay vì .hidden
+    if(key === "game" || key === "end"){
+      el.style.display = (key === name) ? "block" : "none";
+    }
+  });
+}
+
+function clearModeSelectNotice(){
+  document.getElementById("mode-select-notice").classList.add("hidden");
+}
+document.getElementById("pick-local-mode").addEventListener("click", ()=>{ clearModeSelectNotice(); showScreen("setup"); });
+document.getElementById("setup-back-btn").addEventListener("click", ()=> showScreen("modeSelect"));
+
+document.getElementById("pick-online-mode").addEventListener("click", ()=>{
+  clearModeSelectNotice();
+  const saved = localStorage.getItem("dsg_api_url");
+  if(saved) document.getElementById("apps-script-url").value = saved;
+  showScreen("onlineLobby");
+});
+document.getElementById("lobby-back-btn").addEventListener("click", ()=> showScreen("modeSelect"));
+
+/* ======================= CHẾ ĐỘ ONLINE NHIỀU NGƯỜI ====================
+   Dùng Google Apps Script (deploy dưới dạng Web App) + một Google Sheet
+   làm "máy chủ" lưu trạng thái phòng. Trình duyệt của mỗi người chơi gọi
+   fetch() tới địa chỉ Web App đó (GET để đọc trạng thái, POST để gửi hành
+   động) và hỏi lại định kỳ (polling) mỗi vài giây để cập nhật.
+   Đây KHÔNG phải kết nối trực tiếp giữa các trình duyệt (không còn WebRTC/
+   PeerJS) nên không phụ thuộc NAT/tường lửa giữa 2 máy — chỉ cần mỗi máy
+   tự kết nối Internet ra ngoài tới máy chủ Google như một trang web bình
+   thường.
+   Lưu ý: phiên bản này CHƯA hỗ trợ giới hạn thời gian trả lời cho chế độ
+   online (khác với chế độ chơi chung một máy), vì cần cơ chế đếm giờ phía
+   máy chủ phức tạp hơn — có thể bổ sung sau nếu cần.
+========================================================================= */
+const POLL_INTERVAL_MS = 2000;
+
+let currentRoomCode = null;
+let isHostOfRoom = false;
+let myClientId = null;
+let room = null;            // trạng thái phòng mới nhất đọc được từ máy chủ
+let pollTimer = null;
+let isPolling = false;      // chặn việc gọi chồng lấn nếu request trước chưa xong
+let lastRenderedRoomJson = null; // để phát hiện "không có gì thay đổi" và bỏ qua vẽ lại
+
+function genClientId(){
+  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return "c" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+function getApiUrl(){
+  const val = document.getElementById("apps-script-url").value.trim();
+  if(val) localStorage.setItem("dsg_api_url", val);
+  return val;
+}
+
+function myOnlineInfo(){
+  return {
+    name: document.getElementById("online-my-name").value.trim() || "Người chơi",
+    color: document.getElementById("online-my-color").value,
+    emoji: document.getElementById("online-my-emoji").value.trim().slice(0,4),
+  };
+}
+function showLobbyFeedback(msg, type){
+  const el = document.getElementById("lobby-feedback");
+  el.textContent = msg;
+  el.className = "feedback" + (type ? " " + type : "");
+}
+
+async function apiCall(action, params){
+  const apiUrl = getApiUrl();
+  const qs = new URLSearchParams({ action, ...params }).toString();
+  const res = await fetch(apiUrl + "?" + qs, { method: "GET" });
+  return res.json();
+}
+
+/* ---------- Tạo phòng ---------- */
+document.getElementById("create-room-btn").addEventListener("click", async ()=>{
+  const apiUrl = getApiUrl();
+  if(!apiUrl){ showLobbyFeedback("Bạn cần dán địa chỉ API (link Apps Script) ở trên trước.", "error"); return; }
+  const info = myOnlineInfo();
+  myClientId = genClientId();
+  showLobbyFeedback("Đang tạo phòng…", "");
+  try{
+    const res = await apiCall("create", { name: info.name, color: info.color, emoji: info.emoji, clientId: myClientId });
+    if(!res.ok){ showLobbyFeedback(res.error || "Không tạo được phòng.", "error"); return; }
+    currentRoomCode = res.code;
+    isHostOfRoom = true;
+    room = res.room;
+    enterRoomScreen();
+    startPolling();
+  }catch(err){
+    showLobbyFeedback("Không kết nối được tới máy chủ. Kiểm tra lại địa chỉ API và kết nối mạng.", "error");
+  }
+});
+
+/* ---------- Tham gia phòng ---------- */
+document.getElementById("join-room-btn").addEventListener("click", async ()=>{
+  const apiUrl = getApiUrl();
+  if(!apiUrl){ showLobbyFeedback("Bạn cần dán địa chỉ API (link Apps Script) ở trên trước.", "error"); return; }
+  const code = document.getElementById("join-room-code").value.trim().toUpperCase();
+  if(!code){ showLobbyFeedback("Nhập mã phòng đã nhé.", "error"); return; }
+  const info = myOnlineInfo();
+  myClientId = genClientId();
+  showLobbyFeedback("Đang kết nối tới phòng…", "");
+  try{
+    const res = await apiCall("join", { code, name: info.name, color: info.color, emoji: info.emoji, clientId: myClientId });
+    if(!res.ok){ showLobbyFeedback(res.error || "Không vào được phòng.", "error"); return; }
+    currentRoomCode = code;
+    room = res.room;
+    isHostOfRoom = (room.hostId === myClientId);
+    onlineEndAnimated = false;
+    enterRoomScreen();
+    startPolling();
+  }catch(err){
+    showLobbyFeedback("Không kết nối được tới máy chủ. Kiểm tra lại địa chỉ API và kết nối mạng.", "error");
+  }
+});
+
+/* ---------- Polling trạng thái phòng ---------- */
+function startPolling(){
+  stopPolling();
+  pollTimer = setInterval(pollState, POLL_INTERVAL_MS);
+}
+function stopPolling(){
+  if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+}
+async function pollState(){
+  if(!currentRoomCode || isPolling) return;
+  isPolling = true;
+  try{
+    const res = await apiCall("state", { code: currentRoomCode });
+    if(!res.ok){
+      stopPolling();
+      const wasEnded = room && room.status === "ended";
+      currentRoomCode = null; room = null; isHostOfRoom = false; myClientId = null;
+      if(!wasEnded) goHomeWithNotice(res.error || "Phòng không còn tồn tại.");
+      return;
+    }
+    room = res.room;
+    // Chỉ vẽ lại giao diện khi dữ liệu THỰC SỰ thay đổi so với lần vẽ trước.
+    // Nếu không, cứ 2 giây lại xoá/tạo lại toàn bộ danh sách sẽ gây giật,
+    // nháy hình, và làm mất focus/con trỏ nếu đang gõ trong ô nhập.
+    const json = JSON.stringify(room);
+    if(json !== lastRenderedRoomJson){
+      lastRenderedRoomJson = json;
+      rerenderCurrentOnlineScreen();
+    }
+  }catch(err){
+    // lỗi mạng tạm thời khi poll — bỏ qua, thử lại ở lần poll kế tiếp
+  }finally{
+    isPolling = false;
+  }
+}
+
+function enterRoomScreen(){
+  onlineEndAnimated = false;
+  lastRenderedRoomJson = null;
+  const staleRow = document.getElementById("room-self-row");
+  if(staleRow) staleRow.remove();
+  showScreen("onlineRoom");
+  showRoomCodeUI();
+  rerenderCurrentOnlineScreen();
+}
+function showRoomCodeUI(){
+  document.getElementById("room-code-display").textContent = currentRoomCode;
+  document.getElementById("copy-room-code-btn").onclick = ()=>{
+    if(navigator.clipboard){ navigator.clipboard.writeText(currentRoomCode).catch(()=>{}); }
+    showRoomFeedback("Đã sao chép mã phòng!");
+  };
+}
+function showRoomFeedback(msg){
+  const el = document.getElementById("room-waiting-hint");
+  const original = el.dataset.base || "";
+  el.textContent = msg;
+  setTimeout(()=>{ el.textContent = original; }, 1800);
+}
+function escapeAttr(s){
+  return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;");
+}
+
+async function updateMyInfo(name, color, emoji){
+  if(!room || room.status !== "lobby") return;
+  name = (name || "").trim().slice(0,20) || "Người chơi";
+  emoji = (emoji || "").trim().slice(0,4);
+  try{
+    const res = await apiCall("update_info", { code: currentRoomCode, clientId: myClientId, name, color, emoji });
+    if(res.ok){ room = res.room; rerenderCurrentOnlineScreen(); }
+  }catch(err){ /* bỏ qua, sẽ đồng bộ lại ở lần poll kế tiếp */ }
+}
+
+function rerenderCurrentOnlineScreen(){
+  if(!room) return;
+  lastRenderedRoomJson = JSON.stringify(room);
+  const target = room.status === "lobby" ? "onlineRoom" : (room.status === "playing" ? "onlineGame" : "onlineEnd");
+  if(currentScreenName !== target) showScreen(target);
+  if(target === "onlineRoom") renderRoomScreen();
+  else if(target === "onlineGame") renderOnlineGame(room);
+  else renderOnlineEnd(room);
+}
+
+function renderRoomScreen(){
+  const listEl = document.getElementById("room-player-list");
+  const me = room.players.find(p => p.clientId === myClientId);
+  const others = room.players.filter(p => p.clientId !== myClientId);
+
+  // Hàng "của mình" (ô nhập tên + màu): chỉ TẠO MỘT LẦN, không xoá/tạo lại
+  // mỗi lần vẽ lại — nếu không, mỗi lần poll (2 giây/lần) sẽ phá mất ô
+  // đang gõ dở, làm mất con trỏ/focus và cảm giác giật.
+  let selfRow = document.getElementById("room-self-row");
+  if(!selfRow){
+    selfRow = document.createElement("div");
+    selfRow.id = "room-self-row";
+    selfRow.className = "player-config-row";
+    selfRow.style.width = "100%";
+    selfRow.innerHTML = `
+      <input type="color" id="room-my-color" value="${me.color}">
+      <input type="text" id="room-my-emoji" class="emoji-input" placeholder="🙂" maxlength="4" value="${escapeAttr(me.emoji || "")}">
+      <input type="text" id="room-my-name" value="${escapeAttr(me.name)}" maxlength="20">
+      <span class="player-badge-num" id="room-self-badge">${me.clientId===room.hostId ? "👑" : "(bạn)"}</span>
+    `;
+    listEl.appendChild(selfRow);
+    const myColorInput = document.getElementById("room-my-color");
+    const myEmojiInput = document.getElementById("room-my-emoji");
+    const myNameInput = document.getElementById("room-my-name");
+    const commit = ()=> updateMyInfo(myNameInput.value, myColorInput.value, myEmojiInput.value);
+    myColorInput.addEventListener("change", commit);
+    myEmojiInput.addEventListener("change", commit);
+    myNameInput.addEventListener("change", commit);
+    myNameInput.addEventListener("keydown", e=>{ if(e.key==="Enter"){ myNameInput.blur(); } });
+  } else {
+    // Cập nhật huy hiệu chủ phòng nếu có thay đổi, không đụng tới các ô nhập.
+    const badge = document.getElementById("room-self-badge");
+    if(badge) badge.textContent = me.clientId===room.hostId ? "👑" : "(bạn)";
+  }
+
+  // Các người chơi khác: không có ô nhập nên rebuild thoải mái, không lo mất focus.
+  listEl.querySelectorAll(".player-chip").forEach(el => el.remove());
+  others.forEach(p=>{
+    const chip = document.createElement("div");
+    chip.className = "player-chip";
+    const kickBtn = isHostOfRoom
+      ? `<button class="kick-btn" type="button" data-kick="${escapeAttr(p.clientId)}" title="Loại khỏi phòng">✕</button>`
+      : "";
+    chip.innerHTML = `<span class="dot" style="background:${p.color}"></span>${playerLabelHtml(p)}${p.clientId===room.hostId ? " 👑" : ""}${kickBtn}`;
+    listEl.appendChild(chip);
+  });
+  if(isHostOfRoom){
+    listEl.querySelectorAll("[data-kick]").forEach(btn=>{
+      btn.addEventListener("click", ()=> kickPlayer(btn.dataset.kick));
+    });
+  }
+
+  document.getElementById("room-player-total").textContent = room.players.length;
+
+  const hostActions = document.getElementById("room-host-actions");
+  const waitingHint = document.getElementById("room-waiting-hint");
+  const amHost = room.hostId === myClientId;
+  hostActions.classList.toggle("hidden", !amHost);
+  const startBtn = document.getElementById("start-online-game-btn");
+  startBtn.disabled = room.players.length < 2;
+  const baseHint = amHost
+    ? (room.players.length < 2 ? "Cần ít nhất 2 người chơi để bắt đầu." : "Sẵn sàng! Bấm Bắt đầu chơi khi mọi người đã vào phòng.")
+    : "Đang chờ chủ phòng (👑) bấm bắt đầu…";
+  waitingHint.textContent = baseHint;
+  waitingHint.dataset.base = baseHint;
+}
+
+document.getElementById("start-online-game-btn").addEventListener("click", async ()=>{
+  if(!isHostOfRoom || !room || room.players.length < 2) return;
+  try{
+    const res = await apiCall("start", { code: currentRoomCode, clientId: myClientId });
+    if(res.ok){ room = res.room; rerenderCurrentOnlineScreen(); }
+    else showRoomFeedback(res.error || "Không bắt đầu được.");
+  }catch(err){ showRoomFeedback("Lỗi kết nối, thử lại."); }
+});
+
+async function kickPlayer(targetClientId){
+  if(!isHostOfRoom || !room) return;
+  try{
+    const res = await apiCall("kick", { code: currentRoomCode, clientId: myClientId, target: targetClientId });
+    if(res.ok){ room = res.room; rerenderCurrentOnlineScreen(); }
+  }catch(err){ /* sẽ đồng bộ lại ở lần poll kế tiếp */ }
+}
+
+document.getElementById("leave-room-btn").addEventListener("click", leaveOnlineRoom);
+
+function goHomeWithNotice(msg){
+  const el = document.getElementById("mode-select-notice");
+  if(msg){ el.textContent = msg; el.classList.remove("hidden"); }
+  else { el.classList.add("hidden"); el.textContent = ""; }
+  showScreen("modeSelect");
+}
+
+async function leaveOnlineRoom(){
+  stopPolling();
+  const codeToLeave = currentRoomCode;
+  const idToLeave = myClientId;
+  const wasEnded = room && room.status === "ended";
+  currentRoomCode = null; room = null; isHostOfRoom = false; myClientId = null;
+  if(codeToLeave && idToLeave){
+    try{ await apiCall("quit", { code: codeToLeave, clientId: idToLeave }); }catch(err){ /* bỏ qua */ }
+  }
+  if(!wasEnded) goHomeWithNotice(null);
+  else showScreen("modeSelect");
+}
+
+/* ---------- Vòng chơi online ---------- */
+function renderOnlineGame(rm){
+  if(rm.status === "ended"){ renderOnlineEnd(rm); return; }
+
+  document.getElementById("game-room-code-display").textContent = currentRoomCode || "——";
+
+  const scoreboardEl = document.getElementById("online-scoreboard");
+  scoreboardEl.innerHTML = "";
+  rm.players.forEach(p=>{
+    const chip = document.createElement("div");
+    chip.className = "player-chip" + (!p.active ? " out" : "") + (p.active && p.clientId===rm.currentPlayerId ? " current" : "");
+    const kickBtn = (isHostOfRoom && p.clientId !== myClientId && p.active)
+      ? `<button class="kick-btn" type="button" data-kick="${escapeAttr(p.clientId)}" title="Loại khỏi phòng">✕</button>`
+      : "";
+    chip.innerHTML = `<span class="dot" style="background:${p.color}"></span>${playerLabelHtml(p)}${p.clientId===myClientId ? " (bạn)" : ""}${kickBtn}`;
+    scoreboardEl.appendChild(chip);
+  });
+  if(isHostOfRoom){
+    scoreboardEl.querySelectorAll("[data-kick]").forEach(btn=>{
+      btn.addEventListener("click", ()=> kickPlayer(btn.dataset.kick));
+    });
+  }
+
+  const turnPlayer = rm.players.find(p=>p.clientId===rm.currentPlayerId) || rm.players[0];
+  const banner = document.getElementById("online-turn-banner");
+  banner.style.background = `linear-gradient(180deg, ${turnPlayer.color}, ${shade(turnPlayer.color,-25)})`;
+  document.getElementById("online-turn-player-name").textContent = playerLabelPlain(turnPlayer) + (turnPlayer.clientId===myClientId ? " (bạn)" : "");
+  document.getElementById("online-turn-label").textContent = turnPlayer.clientId===myClientId ? "Đến lượt bạn!" : "Đến lượt";
+  document.getElementById("timer-display-online").classList.add("hidden"); // chưa hỗ trợ đếm giờ online
+
+  const isMyTurn = turnPlayer.clientId === myClientId;
+  const input = document.getElementById("online-street-input");
+  document.getElementById("online-submit-btn").disabled = !isMyTurn;
+  input.disabled = !isMyTurn;
+  input.style.borderColor = turnPlayer.color;
+  input.style.background = turnPlayer.color;
+  input.placeholder = isMyTurn ? "Nhập tên một ca sĩ/nhóm nhạc…" : "Đang chờ " + turnPlayer.name + "…";
+
+  const logEl = document.getElementById("online-street-log");
+  logEl.innerHTML = "";
+  rm.usedStreets.forEach(item=>{
+    const plate = document.createElement("div");
+    plate.className = "street-plate";
+    plate.innerHTML = `<span class="n" style="background:${item.color}"></span>${item.emoji ? escapeHtml(item.emoji) + " " : ""}${escapeHtml(item.name)}`;
+    logEl.appendChild(plate);
+  });
+  document.getElementById("online-street-total").textContent = rm.usedStreets.length;
+}
+
+let onlineEndAnimated = false;
+function renderOnlineEnd(rm){
+  document.getElementById("end-room-code-display").textContent = currentRoomCode || "——";
+  if(!onlineEndAnimated){ onlineEndAnimated = true; launchConfetti(); playWinSound(); }
+  const winner = rm.players.find(p=>p.clientId===rm.winnerId);
+  if(winner){
+    document.getElementById("online-winner-dot").style.background = winner.color;
+    document.getElementById("online-winner-name").textContent = playerLabelPlain(winner) + (winner.clientId===myClientId ? " (bạn)" : "");
+    const cnt = rm.usedStreets.filter(s=>s.playerId===winner.clientId).length;
+    document.getElementById("online-winner-stat").textContent =
+      `Đã kể tổng cộng ${rm.usedStreets.length} nghệ sĩ trong ván này, trong đó ${winner.name} đóng góp ${cnt} nghệ sĩ.`;
+  } else {
+    document.getElementById("online-winner-name").textContent = "Hòa — không ai trụ lại!";
+    document.getElementById("online-winner-stat").textContent = "";
+  }
+}
+
+function showOnlineFeedback(msg, type){
+  const el = document.getElementById("online-feedback");
+  el.textContent = msg;
+  el.className = "feedback" + (type ? " " + type : "");
+}
+
+async function submitStreetOnline(){
+  const input = document.getElementById("online-street-input");
+  const raw = input.value.trim();
+  if(!raw){ showOnlineFeedback("Bạn chưa nhập tên đường nào cả.", "error"); playErrorSound(); return; }
+  const resolved = resolveStreet(raw);
+  if(!resolved.ok){
+    showOnlineFeedback(resolved.error, "error");
+    playErrorSound();
+    input.select();
+    return;
+  }
+  if(!room || room.status !== "playing" || room.currentPlayerId !== myClientId){
+    showOnlineFeedback("Chưa tới lượt bạn — đợi chút rồi thử lại nhé.", "error");
+    playErrorSound();
+    return;
+  }
+  input.value = "";
+  showOnlineFeedback(`Đang gửi "${raw}"…`, "");
+  try{
+    const res = await apiCall("submit", { code: currentRoomCode, clientId: myClientId, streetRaw: raw });
+    if(!res.ok){
+      showOnlineFeedback(res.error || "Có lỗi khi gửi, thử lại nhé.", "error");
+      playErrorSound();
+      return;
+    }
+    room = res.room;
+    rerenderCurrentOnlineScreen();
+    showOnlineFeedback(`✓ Đã kể "${res.canonical || raw}".`, "ok");
+    playSuccessSound();
+  }catch(err){
+    showOnlineFeedback("Không kết nối được tới máy chủ, thử lại nhé.", "error");
+    playErrorSound();
+  }
+}
+
+document.getElementById("online-submit-btn").addEventListener("click", submitStreetOnline);
+document.getElementById("online-street-input").addEventListener("keydown", e=>{
+  if(e.key === "Enter"){ e.preventDefault(); submitStreetOnline(); }
+});
+document.getElementById("online-quit-btn").addEventListener("click", leaveOnlineRoom);
+document.getElementById("online-home-btn").addEventListener("click", leaveOnlineRoom);
+document.getElementById("copy-room-code-game-btn").addEventListener("click", ()=>{
+  if(currentRoomCode && navigator.clipboard) navigator.clipboard.writeText(currentRoomCode).catch(()=>{});
+});
+document.getElementById("copy-room-code-end-btn").addEventListener("click", ()=>{
+  if(currentRoomCode && navigator.clipboard) navigator.clipboard.writeText(currentRoomCode).catch(()=>{});
+});
+
+/* ---------- Nhận diện giọng nói cho ô nhập online ---------- */
+(function setupOnlineMic(){
+  const micBtn = document.getElementById("online-mic-btn");
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ micBtn.style.display = "none"; return; }
+  const recognition = new SR();
+  recognition.lang = "vi-VN";
+  recognition.interimResults = false;
+  let listening = false;
+  micBtn.addEventListener("click", ()=>{
+    if(listening) return;
+    try{ recognition.start(); listening = true; micBtn.classList.add("listening"); }catch(e){}
+  });
+  recognition.addEventListener("result", (e)=>{
+    document.getElementById("online-street-input").value = e.results[0][0].transcript;
+  });
+  recognition.addEventListener("end", ()=>{ listening = false; micBtn.classList.remove("listening"); });
+  recognition.addEventListener("error", ()=>{ listening = false; micBtn.classList.remove("listening"); });
+})();
+
+/* ======================= SETUP SCREEN (CHƠI CHUNG MỘT MÁY) ======================= */
+const playerCountDisplay = document.getElementById("player-count-display");
+const playerConfigList = document.getElementById("player-config-list");
+let playerCount = 2;
+
+function renderPlayerConfig(){
+  playerConfigList.innerHTML = "";
+  for(let i=0;i<playerCount;i++){
+    const row = document.createElement("div");
+    row.className = "player-config-row";
+    const existingName = row.dataset;
+    row.innerHTML = `
+      <span class="player-badge-num">#${i+1}</span>
+      <input type="color" id="color-${i}" value="${DEFAULT_COLORS[i % DEFAULT_COLORS.length]}">
+      <input type="text" id="emoji-${i}" class="emoji-input" placeholder="🙂" maxlength="4">
+      <input type="text" id="name-${i}" placeholder="Tên người chơi ${i+1}" maxlength="20">
+    `;
+    playerConfigList.appendChild(row);
+  }
+}
+renderPlayerConfig();
+
+document.getElementById("dec-player").addEventListener("click", ()=>{
+  if(playerCount > 2){ playerCount--; playerCountDisplay.textContent = playerCount; renderPlayerConfig(); }
+});
+document.getElementById("inc-player").addEventListener("click", ()=>{
+  if(playerCount < 10){ playerCount++; playerCountDisplay.textContent = playerCount; renderPlayerConfig(); }
+});
+
+/* ---------- Cấu hình giới hạn thời gian (chơi chung một máy) ---------- */
+document.getElementById("enable-timer-local").addEventListener("change", (e)=>{
+  timerEnabledLocal = e.target.checked;
+  document.getElementById("timer-seconds-row-local").style.display = timerEnabledLocal ? "flex" : "none";
+});
+document.getElementById("dec-timer-local").addEventListener("click", ()=>{
+  timerSecondsLocal = Math.max(10, timerSecondsLocal - 5);
+  document.getElementById("timer-seconds-display-local").textContent = timerSecondsLocal;
+});
+document.getElementById("inc-timer-local").addEventListener("click", ()=>{
+  timerSecondsLocal = Math.min(120, timerSecondsLocal + 5);
+  document.getElementById("timer-seconds-display-local").textContent = timerSecondsLocal;
+});
+
+document.getElementById("start-game-btn").addEventListener("click", ()=>{
+  players = [];
+  for(let i=0;i<playerCount;i++){
+    const nameInput = document.getElementById(`name-${i}`);
+    const colorInput = document.getElementById(`color-${i}`);
+    const emojiInput = document.getElementById(`emoji-${i}`);
+    const name = (nameInput.value.trim() || `Người chơi ${i+1}`);
+    const emoji = emojiInput.value.trim().slice(0,4);
+    players.push({ id: i, name, color: colorInput.value, emoji, active: true });
+  }
+  currentIdx = 0;
+  usedCanonicalSet = new Set();
+  usedLog = [];
+  showScreen("game");
+  renderScoreboard();
+  renderTurnBanner();
+  renderStreetLog();
+  document.getElementById("street-input").value = "";
+  document.getElementById("feedback").textContent = "";
+  document.getElementById("street-input").focus();
+});
+
+/* ======================= GAME SCREEN RENDER ======================= */
+const scoreboardEl = document.getElementById("scoreboard");
+const turnBannerEl = document.getElementById("turn-banner");
+const turnPlayerNameEl = document.getElementById("turn-player-name");
+const streetLogEl = document.getElementById("street-log");
+const streetTotalEl = document.getElementById("street-total");
+const feedbackEl = document.getElementById("feedback");
+const streetInput = document.getElementById("street-input");
+
+function renderScoreboard(){
+  scoreboardEl.innerHTML = "";
+  players.forEach(p=>{
+    const chip = document.createElement("div");
+    chip.className = "player-chip" + (p.active ? "" : " out") + (p.active && p.id === players[currentIdx].id ? " current" : "");
+    chip.innerHTML = `<span class="dot" style="background:${p.color}"></span>${playerLabelHtml(p)}`;
+    scoreboardEl.appendChild(chip);
+  });
+}
+
+function renderTurnBanner(){
+  const p = players[currentIdx];
+  turnBannerEl.style.background = `linear-gradient(180deg, ${p.color}, ${shade(p.color,-25)})`;
+  turnPlayerNameEl.textContent = playerLabelPlain(p);
+  streetInput.style.borderColor = p.color;
+  streetInput.style.background = p.color;
+  startLocalTurnTimer();
+}
+
+function renderStreetLog(){
+  streetLogEl.innerHTML = "";
+  usedLog.forEach(item=>{
+    const plate = document.createElement("div");
+    plate.className = "street-plate";
+    plate.innerHTML = `<span class="n" style="background:${item.color}"></span>${item.emoji ? escapeHtml(item.emoji) + " " : ""}${escapeHtml(item.name)}`;
+    streetLogEl.appendChild(plate);
+  });
+  streetTotalEl.textContent = usedLog.length;
+}
+
+function escapeHtml(s){
+  const d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+function shade(hex, percent){
+  let f = parseInt(hex.slice(1),16), t = percent<0?0:255, p = Math.abs(percent)/100;
+  let R = f>>16, G = (f>>8)&0x00FF, B = f&0x0000FF;
+  const nr = Math.round((t-R)*p)+R, ng = Math.round((t-G)*p)+G, nb = Math.round((t-B)*p)+B;
+  return "#" + (0x1000000 + nr*0x10000 + ng*0x100 + nb).toString(16).slice(1);
+}
+function launchConfetti(){
+  const layer = document.createElement("div");
+  layer.className = "confetti-layer";
+  document.body.appendChild(layer);
+  const colors = ["#c99a3c","#e7bd63","#123a63","#a5333c","#2b7a4b","#ffffff"];
+  const n = 70;
+  for(let i=0;i<n;i++){
+    const piece = document.createElement("div");
+    piece.className = "confetti-piece";
+    piece.style.left = (Math.random()*100) + "vw";
+    piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+    piece.style.animationDuration = (2.2 + Math.random()*1.6) + "s";
+    piece.style.animationDelay = (Math.random()*0.5) + "s";
+    piece.style.transform = `rotate(${Math.random()*360}deg)`;
+    if(Math.random() < 0.4) piece.style.borderRadius = "50%";
+    layer.appendChild(piece);
+  }
+  setTimeout(()=>{ layer.remove(); }, 4200);
+}
+
+function nextActiveIndex(fromIdx){
+  const n = players.length;
+  for(let step=1; step<=n; step++){
+    const idx = (fromIdx + step) % n;
+    if(players[idx].active) return idx;
+  }
+  return fromIdx;
+}
+
+function activePlayers(){ return players.filter(p=>p.active); }
+
+function showFeedback(msg, type){
+  feedbackEl.textContent = msg;
+  feedbackEl.className = "feedback" + (type ? " " + type : "");
+}
+
+function submitStreet(){
+  const raw = streetInput.value.trim();
+  if(!raw){
+    showFeedback("Bạn chưa nhập tên đường nào cả.", "error");
+    playErrorSound();
+    return;
+  }
+
+  const resolved = resolveStreet(raw);
+  if(!resolved.ok){
+    showFeedback(resolved.error, "error");
+    playErrorSound();
+    streetInput.select();
+    return;
+  }
+  const canonical = resolved.canonical;
+  if(usedCanonicalSet.has(canonical)){
+    showFeedback(`"${canonical}" đã được kể rồi. Kể đường khác đi!`, "error");
+    playErrorSound();
+    streetInput.select();
+    return;
+  }
+
+  const player = players[currentIdx];
+  usedCanonicalSet.add(canonical);
+  usedLog.unshift({ name: canonical, playerId: player.id, color: player.color, emoji: player.emoji });
+  renderStreetLog();
+  showFeedback(`✓ Hợp lệ! ${player.name} đã kể "${canonical}".`, "ok");
+  playSuccessSound();
+
+  streetInput.value = "";
+
+  const nextIdx = nextActiveIndex(currentIdx);
+  if(activePlayers().length <= 1){
+    endGame();
+    return;
+  }
+  currentIdx = nextIdx;
+  renderScoreboard();
+  renderTurnBanner();
+  streetInput.focus();
+}
+
+function quitCurrentPlayer(reason){
+  const player = players[currentIdx];
+  player.active = false;
+
+  if(activePlayers().length <= 1){
+    endGame();
+    return;
+  }
+  currentIdx = nextActiveIndex(currentIdx);
+  renderScoreboard();
+  renderTurnBanner();
+  showFeedback(reason === "timeout" ? `⏰ Hết giờ! ${player.name} bị loại vì không trả lời kịp.` : `${player.name} đã bỏ cuộc.`, "error");
+  streetInput.value = "";
+  streetInput.focus();
+}
+
+/* ---------- Giới hạn thời gian trả lời (chơi chung một máy) ---------- */
+let timerEnabledLocal = false;
+let timerSecondsLocal = 30;
+let localTurnTimer = null;
+let localTurnDeadline = null;
+
+function startLocalTurnTimer(){
+  clearLocalTurnTimer();
+  const el = document.getElementById("timer-display-local");
+  if(!timerEnabledLocal){ el.classList.add("hidden"); return; }
+  el.classList.remove("hidden");
+  localTurnDeadline = Date.now() + timerSecondsLocal * 1000;
+  updateLocalTimerDisplay();
+  localTurnTimer = setInterval(updateLocalTimerDisplay, 250);
+}
+function updateLocalTimerDisplay(){
+  const el = document.getElementById("timer-display-local");
+  const remaining = Math.max(0, Math.ceil((localTurnDeadline - Date.now()) / 1000));
+  el.textContent = remaining + "s";
+  el.classList.toggle("urgent", remaining <= 5);
+  if(remaining <= 0){
+    clearLocalTurnTimer();
+    quitCurrentPlayer("timeout");
+  }
+}
+function clearLocalTurnTimer(){
+  if(localTurnTimer){ clearInterval(localTurnTimer); localTurnTimer = null; }
+}
+
+function endGame(){
+  clearLocalTurnTimer();
+  showScreen("end");
+  launchConfetti();
+  playWinSound();
+  const winner = activePlayers()[0];
+  if(winner){
+    document.getElementById("winner-dot").style.background = winner.color;
+    document.getElementById("winner-name").textContent = playerLabelPlain(winner);
+    const winnerStreetCount = usedLog.filter(s=>s.playerId===winner.id).length;
+    document.getElementById("winner-stat").textContent =
+      `Đã kể tổng cộng ${usedLog.length} nghệ sĩ trong ván này, trong đó ${winner.name} đóng góp ${winnerStreetCount} nghệ sĩ.`;
+  } else {
+    document.getElementById("winner-name").textContent = "Hòa — không ai trụ lại!";
+    document.getElementById("winner-stat").textContent = "";
+  }
+}
+
+document.getElementById("submit-btn").addEventListener("click", submitStreet);
+streetInput.addEventListener("keydown", e=>{
+  if(e.key === "Enter"){ e.preventDefault(); submitStreet(); }
+});
+document.getElementById("quit-btn").addEventListener("click", quitCurrentPlayer);
+document.getElementById("restart-btn").addEventListener("click", ()=>{
+  showScreen("setup");
+});
+
+/* ======================= NHẬN DIỆN GIỌNG NÓI ======================= */
+const micBtn = document.getElementById("mic-btn");
+const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if(SpeechRecognitionAPI){
+  const recognition = new SpeechRecognitionAPI();
+  recognition.lang = "vi-VN";
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  let listening = false;
+
+  micBtn.addEventListener("click", ()=>{
+    if(listening) return;
+    try{
+      recognition.start();
+      listening = true;
+      micBtn.classList.add("listening");
+      showFeedback("Đang nghe… hãy nói tên ca sĩ.", "");
+    }catch(err){ /* already started */ }
+  });
+
+  recognition.addEventListener("result", (e)=>{
+    const transcript = e.results[0][0].transcript;
+    streetInput.value = transcript;
+    showFeedback(`Đã nghe: "${transcript}" — nhấn Xác nhận nếu đúng.`, "");
+  });
+  recognition.addEventListener("end", ()=>{
+    listening = false;
+    micBtn.classList.remove("listening");
+  });
+  recognition.addEventListener("error", ()=>{
+    listening = false;
+    micBtn.classList.remove("listening");
+    showFeedback("Không nhận diện được giọng nói, hãy thử nhập tay.", "error");
+  });
+} else {
+  micBtn.style.display = "none";
+}
+</script>
+</body>
+</html>
