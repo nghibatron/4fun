@@ -741,6 +741,59 @@
     cursor:pointer;
     font-size:13px;
   }
+  .chat-box{
+    margin-top:14px;
+    border:2px solid var(--plate-blue);
+    border-radius:10px;
+    background:#fffef8;
+    overflow:hidden;
+  }
+  .chat-messages{
+    max-height:140px;
+    overflow-y:auto;
+    padding:8px 10px;
+    font-size:13px;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .chat-messages:empty::before{
+    content:"Chưa có tin nhắn nào — nói gì đó đi!";
+    color:#9c927a;
+    font-style:italic;
+  }
+  .chat-msg{
+    line-height:1.35;
+    word-break:break-word;
+  }
+  .chat-msg .who{
+    font-weight:700;
+    margin-right:4px;
+  }
+  .chat-input-row{
+    display:flex;
+    gap:6px;
+    padding:8px;
+    border-top:1px solid #e4dcc4;
+    background:#faf6e9;
+  }
+  .chat-input-row input{
+    flex:1;
+    padding:8px 10px;
+    border-radius:6px;
+    border:1px solid #d8cfb8;
+    font-size:13px;
+  }
+  .chat-input-row button{
+    padding:8px 14px;
+    border-radius:6px;
+    border:none;
+    background:var(--plate-blue);
+    color:#fff;
+    font-weight:600;
+    cursor:pointer;
+    font-size:13px;
+  }
 </style>
 </head>
 <body>
@@ -855,6 +908,13 @@
         <button id="start-online-game-btn" class="btn btn-primary" type="button">Bắt đầu chơi</button>
       </div>
       <p id="room-waiting-hint" class="hint" style="margin-top:14px;"></p>
+      <div class="chat-box">
+        <div id="room-chat-messages" class="chat-messages"></div>
+        <div class="chat-input-row">
+          <input type="text" id="room-chat-input" placeholder="Nhắn gì đó..." maxlength="200">
+          <button id="room-chat-send-btn" type="button">Gửi</button>
+        </div>
+      </div>
       <div class="setup-actions" style="margin-top:10px;">
         <button id="leave-room-btn" class="btn btn-quit" type="button">Rời phòng</button>
       </div>
@@ -890,6 +950,17 @@
     <div class="card">
       <h2 class="section-title">Những con đường đã kể <span class="street-count">(<b id="online-street-total">0</b>)</span></h2>
       <div id="online-street-log" class="street-log"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Trò chuyện</h2>
+      <div class="chat-box">
+        <div id="game-chat-messages" class="chat-messages"></div>
+        <div class="chat-input-row">
+          <input type="text" id="game-chat-input" placeholder="Nhắn gì đó..." maxlength="200">
+          <button id="game-chat-send-btn" type="button">Gửi</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1079,7 +1150,7 @@ function resolveStreet(raw){
   return {
     ok:false,
     ambiguous:true,
-    error: `Có nhiều đường trùng nhau khi bỏ dấu: ${group.join(", ")}. Vui lòng gõ đầy đủ dấu để chọn đúng đường.`,
+    error: `Tên bạn gõ đang trùng với (các) đường khác khi bỏ dấu. Vui lòng gõ đầy đủ dấu để tránh nhầm lẫn.`,
   };
 }
 
@@ -1347,9 +1418,12 @@ async function pollState(){
 function enterRoomScreen(){
   onlineEndAnimated = false;
   lastRenderedRoomJson = null;
+  lastSeenChatCount = 0;
+  chatPanelsInited = false;
   const staleRow = document.getElementById("room-self-row");
   if(staleRow) staleRow.remove();
-  showScreen("onlineRoom");
+  // Không ép về màn chờ — nếu phòng đang chơi dở (vào giữa chừng), điều
+  // hướng thẳng vào màn hình chơi thay vì màn chờ.
   showRoomCodeUI();
   rerenderCurrentOnlineScreen();
 }
@@ -1383,11 +1457,76 @@ async function updateMyInfo(name, color, emoji){
 function rerenderCurrentOnlineScreen(){
   if(!room) return;
   lastRenderedRoomJson = JSON.stringify(room);
+  initAllChatPanels();
   const target = room.status === "lobby" ? "onlineRoom" : (room.status === "playing" ? "onlineGame" : "onlineEnd");
   if(currentScreenName !== target) showScreen(target);
-  if(target === "onlineRoom") renderRoomScreen();
-  else if(target === "onlineGame") renderOnlineGame(room);
+  if(target === "onlineRoom"){ renderRoomScreen(); renderChatPanel("room", room); }
+  else if(target === "onlineGame"){ renderOnlineGame(room); renderChatPanel("game", room); }
   else renderOnlineEnd(room);
+}
+
+/* ---------- Chat đơn giản trong phòng online ---------- */
+let lastSeenChatCount = 0;
+let chatPanelsInited = false;
+
+function playChatPing(){
+  if(!soundEnabled) return;
+  playTone(660, 0, 0.08, "sine", 0.08);
+}
+
+function formatChatTime(ts){
+  try{
+    const d = new Date(ts);
+    return d.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+  }catch(e){ return ""; }
+}
+
+function renderChatPanel(prefix, rm){
+  const listEl = document.getElementById(prefix + "-chat-messages");
+  if(!listEl) return;
+  const chat = rm.chat || [];
+  const wasAtBottom = listEl.scrollTop + listEl.clientHeight >= listEl.scrollHeight - 10;
+  listEl.innerHTML = "";
+  chat.forEach(msg=>{
+    const row = document.createElement("div");
+    row.className = "chat-msg";
+    row.innerHTML = `<span class="who" style="color:${msg.color || "#333"}">${escapeHtml(msg.name)}:</span>${escapeHtml(msg.text)} <span style="color:#b3a985;font-size:11px;">${formatChatTime(msg.ts)}</span>`;
+    listEl.appendChild(row);
+  });
+  if(wasAtBottom) listEl.scrollTop = listEl.scrollHeight;
+
+  // Phát âm thanh nhẹ nếu có tin nhắn mới từ người khác (không phải tin
+  // của chính mình vừa gửi) kể từ lần vẽ lại trước.
+  if(chat.length > lastSeenChatCount){
+    const newMsgs = chat.slice(lastSeenChatCount);
+    if(newMsgs.some(m => m.clientId !== myClientId)) playChatPing();
+  }
+  lastSeenChatCount = chat.length;
+}
+
+function initChatPanel(prefix){
+  const input = document.getElementById(prefix + "-chat-input");
+  const btn = document.getElementById(prefix + "-chat-send-btn");
+  if(!input || !btn || input.dataset.chatWired) return;
+  input.dataset.chatWired = "1";
+  const send = async ()=>{
+    const text = input.value.trim();
+    if(!text || !currentRoomCode || !myClientId) return;
+    input.value = "";
+    try{
+      const res = await apiCall("chat", { code: currentRoomCode, clientId: myClientId, text });
+      if(res.ok){ room = res.room; rerenderCurrentOnlineScreen(); }
+    }catch(err){ /* bỏ qua, tin nhắn không quá quan trọng để phải báo lỗi to */ }
+  };
+  btn.addEventListener("click", send);
+  input.addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); send(); } });
+}
+
+function initAllChatPanels(){
+  if(chatPanelsInited) return;
+  chatPanelsInited = true;
+  initChatPanel("room");
+  initChatPanel("game");
 }
 
 function renderRoomScreen(){
