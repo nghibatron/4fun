@@ -794,10 +794,100 @@
     cursor:pointer;
     font-size:13px;
   }
+  .chat-widget{
+    position:fixed;
+    bottom:16px;
+    right:16px;
+    z-index:60;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:10px;
+  }
+  .chat-bubble-btn{
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    border:2px solid var(--plate-blue);
+    background:#fff;
+    font-size:22px;
+    cursor:pointer;
+    box-shadow:0 2px 8px rgba(0,0,0,0.2);
+    position:relative;
+    flex-shrink:0;
+  }
+  .chat-unread-badge{
+    position:absolute;
+    top:-4px;
+    right:-4px;
+    background:#c0392b;
+    color:#fff;
+    border-radius:50%;
+    min-width:18px;
+    height:18px;
+    font-size:11px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 4px;
+    box-shadow:0 0 0 2px #fff;
+  }
+  .chat-panel{
+    width:300px;
+    max-width:min(80vw, 320px);
+    background:#fffef8;
+    border:2px solid var(--plate-blue);
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 6px 20px rgba(0,0,0,0.25);
+    display:flex;
+    flex-direction:column;
+  }
+  .chat-panel-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    padding:9px 12px;
+    background:var(--plate-blue);
+    color:#fff;
+    font-size:13px;
+    font-weight:700;
+  }
+  .chat-panel-header button{
+    background:none;
+    border:none;
+    color:#fff;
+    font-size:16px;
+    cursor:pointer;
+    line-height:1;
+    padding:2px 4px;
+  }
+  .chat-panel .chat-messages{ max-height:280px; }
 </style>
 </head>
 <body>
 <button id="sound-toggle-btn" type="button" title="Bật/tắt âm thanh" aria-label="Bật/tắt âm thanh">🔊</button>
+
+<div id="chat-widget" class="chat-widget hidden">
+  <div id="chat-panel" class="chat-panel hidden">
+    <div class="chat-panel-header">
+      <span>Trò chuyện · phòng <b id="chat-panel-room-code">——</b></span>
+      <button id="chat-panel-close-btn" type="button" aria-label="Thu nhỏ khung chat">✕</button>
+    </div>
+    <div id="chat-messages" class="chat-messages"></div>
+    <div class="chat-input-row">
+      <input type="text" id="chat-input" placeholder="Nhắn gì đó..." maxlength="200">
+      <button id="chat-send-btn" type="button">Gửi</button>
+    </div>
+  </div>
+  <button id="chat-toggle-btn" class="chat-bubble-btn" type="button" title="Trò chuyện" aria-label="Mở/đóng khung chat">
+    💬
+    <span id="chat-unread-badge" class="chat-unread-badge hidden">0</span>
+  </button>
+</div>
+
 <div class="wrap">
 
   <div class="title-plate">
@@ -908,13 +998,6 @@
         <button id="start-online-game-btn" class="btn btn-primary" type="button">Bắt đầu chơi</button>
       </div>
       <p id="room-waiting-hint" class="hint" style="margin-top:14px;"></p>
-      <div class="chat-box">
-        <div id="room-chat-messages" class="chat-messages"></div>
-        <div class="chat-input-row">
-          <input type="text" id="room-chat-input" placeholder="Nhắn gì đó..." maxlength="200">
-          <button id="room-chat-send-btn" type="button">Gửi</button>
-        </div>
-      </div>
       <div class="setup-actions" style="margin-top:10px;">
         <button id="leave-room-btn" class="btn btn-quit" type="button">Rời phòng</button>
       </div>
@@ -950,17 +1033,6 @@
     <div class="card">
       <h2 class="section-title">Những con đường đã kể <span class="street-count">(<b id="online-street-total">0</b>)</span></h2>
       <div id="online-street-log" class="street-log"></div>
-    </div>
-
-    <div class="card">
-      <h2 class="section-title">Trò chuyện</h2>
-      <div class="chat-box">
-        <div id="game-chat-messages" class="chat-messages"></div>
-        <div class="chat-input-row">
-          <input type="text" id="game-chat-input" placeholder="Nhắn gì đó..." maxlength="200">
-          <button id="game-chat-send-btn" type="button">Gửi</button>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -1419,7 +1491,6 @@ function enterRoomScreen(){
   onlineEndAnimated = false;
   lastRenderedRoomJson = null;
   lastSeenChatCount = 0;
-  chatPanelsInited = false;
   const staleRow = document.getElementById("room-self-row");
   if(staleRow) staleRow.remove();
   // Không ép về màn chờ — nếu phòng đang chơi dở (vào giữa chừng), điều
@@ -1457,17 +1528,20 @@ async function updateMyInfo(name, color, emoji){
 function rerenderCurrentOnlineScreen(){
   if(!room) return;
   lastRenderedRoomJson = JSON.stringify(room);
-  initAllChatPanels();
+  setChatWidgetVisible(true);
+  renderChatWidget(room);
   const target = room.status === "lobby" ? "onlineRoom" : (room.status === "playing" ? "onlineGame" : "onlineEnd");
   if(currentScreenName !== target) showScreen(target);
-  if(target === "onlineRoom"){ renderRoomScreen(); renderChatPanel("room", room); }
-  else if(target === "onlineGame"){ renderOnlineGame(room); renderChatPanel("game", room); }
+  if(target === "onlineRoom") renderRoomScreen();
+  else if(target === "onlineGame") renderOnlineGame(room);
   else renderOnlineEnd(room);
 }
 
-/* ---------- Chat đơn giản trong phòng online ---------- */
+/* ---------- Chat đơn giản trong phòng online (widget nổi, thu/phóng được) ---------- */
 let lastSeenChatCount = 0;
-let chatPanelsInited = false;
+let chatWidgetWired = false;
+let chatOpen = false;
+let chatUnread = 0;
 
 function playChatPing(){
   if(!soundEnabled) return;
@@ -1481,10 +1555,72 @@ function formatChatTime(ts){
   }catch(e){ return ""; }
 }
 
-function renderChatPanel(prefix, rm){
-  const listEl = document.getElementById(prefix + "-chat-messages");
-  if(!listEl) return;
+function updateChatBadge(){
+  const badge = document.getElementById("chat-unread-badge");
+  if(chatUnread > 0){
+    badge.textContent = chatUnread > 9 ? "9+" : String(chatUnread);
+    badge.classList.remove("hidden");
+  } else {
+    badge.classList.add("hidden");
+  }
+}
+
+function setChatOpen(open){
+  chatOpen = open;
+  document.getElementById("chat-panel").classList.toggle("hidden", !open);
+  if(open){
+    chatUnread = 0;
+    updateChatBadge();
+    const listEl = document.getElementById("chat-messages");
+    listEl.scrollTop = listEl.scrollHeight;
+  }
+}
+
+function initChatWidget(){
+  if(chatWidgetWired) return;
+  chatWidgetWired = true;
+  document.getElementById("chat-toggle-btn").addEventListener("click", ()=> setChatOpen(!chatOpen));
+  document.getElementById("chat-panel-close-btn").addEventListener("click", ()=> setChatOpen(false));
+
+  const input = document.getElementById("chat-input");
+  const btn = document.getElementById("chat-send-btn");
+  const send = async ()=>{
+    const text = input.value.trim();
+    if(!text || !currentRoomCode || !myClientId) return;
+    const original = input.placeholder;
+    input.value = "";
+    try{
+      const res = await apiCall("chat", { code: currentRoomCode, clientId: myClientId, text });
+      if(res.ok){
+        room = res.room;
+        renderChatWidget(room);
+      } else {
+        // Báo lỗi rõ ràng thay vì âm thầm bỏ qua — vd. nếu backend Apps
+        // Script chưa được deploy lại với tính năng chat, người chơi cần
+        // biết vì sao tin nhắn không đi thay vì tưởng nó "biến mất".
+        input.placeholder = res.error || "Không gửi được tin nhắn.";
+        setTimeout(()=>{ input.placeholder = original; }, 3000);
+      }
+    }catch(err){
+      input.placeholder = "Lỗi kết nối, thử lại.";
+      setTimeout(()=>{ input.placeholder = original; }, 3000);
+    }
+  };
+  btn.addEventListener("click", send);
+  input.addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); send(); } });
+}
+
+function setChatWidgetVisible(visible){
+  document.getElementById("chat-widget").classList.toggle("hidden", !visible);
+  if(!visible) setChatOpen(false);
+}
+
+function renderChatWidget(rm){
+  initChatWidget();
+  document.getElementById("chat-panel-room-code").textContent = currentRoomCode || "——";
+
   const chat = rm.chat || [];
+  const listEl = document.getElementById("chat-messages");
   const wasAtBottom = listEl.scrollTop + listEl.clientHeight >= listEl.scrollHeight - 10;
   listEl.innerHTML = "";
   chat.forEach(msg=>{
@@ -1493,40 +1629,19 @@ function renderChatPanel(prefix, rm){
     row.innerHTML = `<span class="who" style="color:${msg.color || "#333"}">${escapeHtml(msg.name)}:</span>${escapeHtml(msg.text)} <span style="color:#b3a985;font-size:11px;">${formatChatTime(msg.ts)}</span>`;
     listEl.appendChild(row);
   });
-  if(wasAtBottom) listEl.scrollTop = listEl.scrollHeight;
+  if(wasAtBottom || chatOpen) listEl.scrollTop = listEl.scrollHeight;
 
-  // Phát âm thanh nhẹ nếu có tin nhắn mới từ người khác (không phải tin
-  // của chính mình vừa gửi) kể từ lần vẽ lại trước.
+  // Phát âm thanh + tăng số tin chưa đọc nếu có tin nhắn mới từ người
+  // khác (không phải tin của chính mình vừa gửi) kể từ lần vẽ lại trước.
   if(chat.length > lastSeenChatCount){
     const newMsgs = chat.slice(lastSeenChatCount);
-    if(newMsgs.some(m => m.clientId !== myClientId)) playChatPing();
+    const fromOthers = newMsgs.filter(m => m.clientId !== myClientId);
+    if(fromOthers.length){
+      playChatPing();
+      if(!chatOpen){ chatUnread += fromOthers.length; updateChatBadge(); }
+    }
   }
   lastSeenChatCount = chat.length;
-}
-
-function initChatPanel(prefix){
-  const input = document.getElementById(prefix + "-chat-input");
-  const btn = document.getElementById(prefix + "-chat-send-btn");
-  if(!input || !btn || input.dataset.chatWired) return;
-  input.dataset.chatWired = "1";
-  const send = async ()=>{
-    const text = input.value.trim();
-    if(!text || !currentRoomCode || !myClientId) return;
-    input.value = "";
-    try{
-      const res = await apiCall("chat", { code: currentRoomCode, clientId: myClientId, text });
-      if(res.ok){ room = res.room; rerenderCurrentOnlineScreen(); }
-    }catch(err){ /* bỏ qua, tin nhắn không quá quan trọng để phải báo lỗi to */ }
-  };
-  btn.addEventListener("click", send);
-  input.addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); send(); } });
-}
-
-function initAllChatPanels(){
-  if(chatPanelsInited) return;
-  chatPanelsInited = true;
-  initChatPanel("room");
-  initChatPanel("game");
 }
 
 function renderRoomScreen(){
@@ -1616,6 +1731,7 @@ async function kickPlayer(targetClientId){
 document.getElementById("leave-room-btn").addEventListener("click", leaveOnlineRoom);
 
 function goHomeWithNotice(msg){
+  setChatWidgetVisible(false);
   const el = document.getElementById("mode-select-notice");
   if(msg){ el.textContent = msg; el.classList.remove("hidden"); }
   else { el.classList.add("hidden"); el.textContent = ""; }
@@ -1632,7 +1748,7 @@ async function leaveOnlineRoom(){
     try{ await apiCall("quit", { code: codeToLeave, clientId: idToLeave }); }catch(err){ /* bỏ qua */ }
   }
   if(!wasEnded) goHomeWithNotice(null);
-  else showScreen("modeSelect");
+  else { setChatWidgetVisible(false); showScreen("modeSelect"); }
 }
 
 /* ---------- Vòng chơi online ---------- */
